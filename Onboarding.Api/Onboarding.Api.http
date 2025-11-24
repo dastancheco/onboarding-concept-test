@@ -1,0 +1,103 @@
+﻿@HostAddress = http://localhost:5014
+
+### =================================================================================
+### GRUPO 1: PRUEBAS DE RUTEO INICIAL (Event: UserRegistered)
+### =================================================================================
+
+### CASO 1.1: Flujo Legacy (Ovex PF)
+### Condición: app_id='OVEX' && client_type='CLIENT'
+### Resultado Esperado:
+### 1. [ROUTING] Asignado Workflow 10
+### 2. [RULES] Disparando Acción 'CALL_LEGACY_API'
+### 3. [INFRA] EXTERNAL_API Call a 'legacy.ovex.com'
+POST {{HostAddress}}/api/events/push
+Content-Type: application/json
+Accept: application/json
+
+{
+  "eventType": "UserRegistered",
+  "payloadJson": "{ \"app_id\": \"OVEX\", \"client_type\": \"CLIENT\", \"email\": \"legacy@test.com\", \"full_name\": \"Juan Legacy\" }"
+}
+
+### CASO 1.2: Flujo Flotilla (Nativo)
+### Condición: app_id='OVEX' && client_type='FLOTILLA_EMP'
+### Resultado Esperado:
+### 1. [ROUTING] Asignado Workflow 20
+### 2. [RULES] Disparando Acción 'CREATE_INTERNAL_PROSPECT'
+POST {{HostAddress}}/api/events/push
+Content-Type: application/json
+Accept: application/json
+
+{
+  "eventType": "UserRegistered",
+  "payloadJson": "{ \"app_id\": \"OVEX\", \"client_type\": \"FLOTILLA_EMP\", \"email\": \"flotilla@empresa.com\", \"company_rfc\": \"FLOT101010ABC\" }"
+}
+
+
+### =================================================================================
+### GRUPO 2: PRUEBAS DE VALIDACIÓN ESTRUCTURAL (Event: StepDataSubmitted)
+### Contexto: Prospecto Dummy (ID 1111...) situado en Paso 101.
+### Requisitos del Paso 101: 'company_rfc' y 'clave_ciec'.
+### =================================================================================
+
+### CASO 2.1: Validación Fallida (Faltan campos)
+### Escenario: Enviamos solo 'clave_ciec'. Falta 'company_rfc'.
+### Resultado Esperado: 
+### [CORE] ❌ Bloqueo por Validación: El campo 'company_rfc' es obligatorio...
+POST {{HostAddress}}/api/events/push
+Content-Type: application/json
+Accept: application/json
+
+{
+  "eventType": "StepDataSubmitted",
+  "payloadJson": "{ \"prospect_id\": \"11111111-1111-1111-1111-111111111111\", \"clave_ciec\": \"12345\" }"
+}
+
+### CASO 2.2: Validación Exitosa + Ejecución de Reglas
+### Escenario: Enviamos 'clave_ciec' Y 'company_rfc'.
+### Condición Adicional (Regla 11): company_rfc == 'FLOT101010ABC'
+### Resultado Esperado:
+### 1. [CORE] ✅ Validación Estructural Exitosa.
+### 2. [RULES] Regla 11 Cumplida. Disparando Acción 'CALL_BURO_CREDITO'.
+### 3. [INFRA] EXTERNAL_API Call a 'burodecredito.com.mx'.
+POST {{HostAddress}}/api/events/push
+Content-Type: application/json
+Accept: application/json
+
+{
+  "eventType": "StepDataSubmitted",
+  "payloadJson": "{ \"prospect_id\": \"11111111-1111-1111-1111-111111111111\", \"clave_ciec\": \"CiecSegura123\", \"company_rfc\": \"FLOT101010ABC\" }"
+}
+
+
+### =================================================================================
+### GRUPO 3: PRUEBAS DE ENCADENAMIENTO DE EVENTOS
+### =================================================================================
+
+### CASO 3.1: Respuesta de Buró -> Disparo de SAT
+### Escenario: El sistema recibe confirmación de que el Buró terminó.
+### Condición (Regla 12): buro_score >= 600
+### Resultado Esperado:
+### 1. [RULES] Regla 12 Cumplida. Disparando Acción 'CALL_SAT_SYN'.
+### 2. [INFRA] EXTERNAL_API Call a 'api.syntage.com'.
+POST {{HostAddress}}/api/events/push
+Content-Type: application/json
+Accept: application/json
+
+{
+  "eventType": "CreditCheckComplete",
+  "payloadJson": "{ \"prospect_id\": \"11111111-1111-1111-1111-111111111111\", \"buro_score\": 750, \"status\": \"OK\" }"
+}
+
+### CASO 3.2: Respuesta de Buró (Score Bajo) -> Silencio
+### Escenario: Score es 400 (menor a 600).
+### Resultado Esperado: 
+### No se dispara ninguna acción. (Logs de "No rules triggered" o silencio).
+POST {{HostAddress}}/api/events/push
+Content-Type: application/json
+Accept: application/json
+
+{
+  "eventType": "CreditCheckComplete",
+  "payloadJson": "{ \"prospect_id\": \"11111111-1111-1111-1111-111111111111\", \"buro_score\": 400 }"
+}
