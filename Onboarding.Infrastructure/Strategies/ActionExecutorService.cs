@@ -39,8 +39,8 @@ namespace Onboarding.Infrastructure.Strategies
             // 2. Decidir qué ejecutar (Factory Pattern)
             if (strategyDef.ImplementationType == "EXTERNAL_API")
             {
-                // Usamos la estrategia genérica para APIs
-                strategyToExecute = _serviceProvider.GetRequiredService<ExternalApiStrategy>();
+                // SPRINT 2: Usar estrategia REAL con HttpClient
+                strategyToExecute = _serviceProvider.GetRequiredService<RealExternalApiStrategy>();
             }
             else if (strategyDef.ImplementationType == "INTERNAL_CODE")
             {
@@ -52,6 +52,8 @@ namespace Onboarding.Infrastructure.Strategies
                 {
                     "InitialCreationStrategy" => _serviceProvider.GetRequiredService<InitialCreationStrategy>(),
                     "RedirectStrategy" => _serviceProvider.GetRequiredService<RedirectStrategy>(),
+                    "PromoteToGoldenRecordStrategy" => _serviceProvider.GetRequiredService<PromoteToGoldenRecordStrategy>(),
+                    "UpdateProspectStatusStrategy" => _serviceProvider.GetRequiredService<UpdateProspectStatusStrategy>(),
                     "ProprietaryParametric" => null, // TODO: Implementar clase
                     _ => throw new NotImplementedException($"Clase C# no implementada: {className}")
                 };

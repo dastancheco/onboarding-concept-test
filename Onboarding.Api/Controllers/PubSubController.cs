@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Onboarding.Api.DTOs;
 using Onboarding.Core.Interfaces;
 
@@ -6,32 +7,74 @@ namespace Onboarding.Api.Controllers
 {
     [ApiController]
     [Route("api/events")]
-    public class PubSubController(IOrchestratorService orchestrator) : ControllerBase
+    public class PubSubController : ControllerBase
     {
-        private readonly IOrchestratorService _orchestrator = orchestrator;
+        private readonly IOrchestratorService _orchestrator;
+        private readonly ILogger<PubSubController> _logger;
+
+        public PubSubController(
+            IOrchestratorService orchestrator,
+            ILogger<PubSubController> logger)
+        {
+            _orchestrator = orchestrator;
+            _logger = logger;
+        }
 
         [HttpPost("push")]
         public async Task<IActionResult> ReceivePushEvent([FromBody] PubSubEventDto eventDto)
         {
-            Console.WriteLine($"\n[API] HTTP POST recibido. Evento: {eventDto.EventType}");
+            // Generar Correlation ID para trazabilidad
+            var correlationId = HttpContext.Request.Headers["X-Correlation-Id"].FirstOrDefault()
+                ?? Guid.NewGuid().ToString();
 
-            if (string.IsNullOrEmpty(eventDto.PayloadJson))
+            using (_logger.BeginScope(new Dictionary<string, object>
             {
-                return BadRequest("El PayloadJson es requerido.");
-            }
+                ["CorrelationId"] = correlationId,
+                ["EventType"] = eventDto.EventType
+            }))
+            {
+                _logger.LogInformation("HTTP POST recibido. Evento: {EventType}", eventDto.EventType);
 
-            try
-            {
-                // Delegamos al Core para que decida qué hacer (Ruteo, Reglas, Acciones)
-                await _orchestrator.ProcessEventAsync(eventDto.EventType, eventDto.PayloadJson);
+                if (string.IsNullOrEmpty(eventDto.PayloadJson))
+                {
+                    _logger.LogWarning("PayloadJson es requerido pero está vacío");
+                    return BadRequest(new { error = "El PayloadJson es requerido." });
+                }
 
-                // Retornamos 200 OK para confirmar recepción (ACK)
-                return Ok(new { status = "Event Processed" });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[API ERROR] {ex.Message}");
-                return StatusCode(500, ex.Message);
+                try
+                {
+                    // Delegamos al Core para que decida qué hacer (Ruteo, Reglas, Acciones)
+                    await _orchestrator.ProcessEventAsync(eventDto.EventType, eventDto.PayloadJson);
+
+                    _logger.LogInformation("Evento procesado con éxito");
+
+                    // Retornamos 200 OK para confirmar recepción (ACK)
+                    return Ok(new
+                    {
+                        status = "Evento Procesado",
+                        correlationId = correlationId
+                    });
+                }
+                catch (ArgumentException argEx)
+                {
+                    _logger.LogWarning(argEx, "Error de validación al procesar el evento");
+                    return BadRequest(new
+                    {
+                        error = "Error de validación",
+                        detail = argEx.Message,
+                        correlationId = correlationId
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error inesperado al procesar el evento");
+                    return StatusCode(500, new
+                    {
+                        error = "Error interno del servidor",
+                        detail = "Ha ocurrido un error inesperado. Por favor, contacte al soporte.",
+                        correlationId = correlationId
+                    });
+                }
             }
         }
     }

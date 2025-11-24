@@ -8,12 +8,12 @@ using Onboarding.Infrastructure.Strategies;
 using Onboarding.Infrastructure.Strategies.External;
 using Onboarding.Infrastructure.Strategies.Internal;
 using Onboarding.Infrastructure.Strategies.Rules;
+using Onboarding.Infrastructure.Events;
 using OvexDataModelingTest.Data;
+using Polly;
+using Polly.Extensions.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace Onboarding.Infrastructure.Extensions
 {
@@ -29,27 +29,117 @@ namespace Onboarding.Infrastructure.Extensions
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // 3. Servicios del Core
+            // 3. Servicios del Core - ARQUITECTURA PRINCIPAL
             services.AddScoped<IOrchestratorService, OrchestratorService>();
             services.AddScoped<RuleEngine>();
             services.AddScoped<StepValidationService>();
 
-            // 4. Estrategias
+            // 4. SPRINT 1: PERSISTENCIA DE DATOS
+            services.AddScoped<IProspectDataService, ProspectDataService>();
+            services.AddScoped<ICustomerDataService, CustomerDataService>();
+            services.AddScoped<IUserManagementService, UserManagementService>();
+            
+            // 5. SPRINT 1 - OPCIÓN C: GESTIÓN DE ESTADOS Y RUTEO
+            services.AddScoped<IProspectStatusService, ProspectStatusService>();
+            services.AddScoped<IWorkflowRoutingService, WorkflowRoutingService>();
+
+            // 6. SPRINT 2: EVENT PUBLISHER
+            // Usar InMemoryEventPublisher para desarrollo/testing
+            // En producción, reemplazar con GooglePubSubPublisher
+            services.AddScoped<IEventPublisher, InMemoryEventPublisher>();
+
+            // 7. SPRINT 2: HTTP CLIENT CON POLLY (Resiliencia)
+            services.AddHttpClient("ExternalAPIs")
+                .AddPolicyHandler(GetRetryPolicy())
+                .AddPolicyHandler(GetCircuitBreakerPolicy())
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5)); // Recrear handler cada 5 minutos
+
+            // 8. Estrategias
             services.AddScoped<IActionExecutor, ActionExecutorService>();
-            services.AddScoped<ExternalApiStrategy>();
+            services.AddScoped<ExternalApiStrategy>(); // Simulado (legacy)
+            services.AddScoped<RealExternalApiStrategy>(); // NUEVO: Real con HttpClient
             services.AddScoped<InitialCreationStrategy>();
             services.AddScoped<RedirectStrategy>();
+            services.AddScoped<PromoteToGoldenRecordStrategy>();
+            services.AddScoped<UpdateProspectStatusStrategy>();
 
-            // Registro de estrategias de operadores
+            // 9. Registro de estrategias de operadores
             services.AddSingleton<IOperatorStrategy, EqualsStrategy>();
             services.AddSingleton<IOperatorStrategy, NotEqualsStrategy>();
             services.AddSingleton<IOperatorStrategy, GreaterThanStrategy>();
             services.AddSingleton<IOperatorStrategy, GreaterOrEqualStrategy>();
             services.AddSingleton<IOperatorStrategy, ContainsStrategy>();
 
-            // Estrategias adicionales pueden ser registradas aquí
+            // 10. VALIDADORES DE CAMPOS (Strategy Pattern)
+            // Built-in validators
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RequiredValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RangeValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.LengthValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.DataTypeValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.AllowedValuesValidator>();
+            
+            // Domain-specific validators
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RfcValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.CurpValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.EmailValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.PhoneValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.PostalCodeValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.UrlValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.DateValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RegexValidator>();
+
+            // Validation pipeline
+            services.AddScoped<ValidationPipeline>();
 
             return services;
+        }
+
+        /// <summary>
+        /// Política de retry con backoff exponencial.
+        /// Reintenta 3 veces con delays de 2s, 4s, 8s.
+        /// </summary>
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError() // 5xx y 408 Request Timeout
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests) // 429
+                .WaitAndRetryAsync(
+                    retryCount: 3,
+                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    onRetry: (outcome, timespan, retryAttempt, context) =>
+                    {
+                        // Logging de retry (se puede inyectar ILogger si es necesario)
+                        Console.WriteLine(
+                            $"[POLLY RETRY] Attempt {retryAttempt} after {timespan.TotalSeconds}s. " +
+                            $"Reason: {outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString()}");
+                    });
+        }
+
+        /// <summary>
+        /// Circuit breaker: Abre el circuito después de 5 fallos consecutivos.
+        /// Permanece abierto por 30 segundos antes de intentar nuevamente.
+        /// </summary>
+        private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .CircuitBreakerAsync(
+                    handledEventsAllowedBeforeBreaking: 5,
+                    durationOfBreak: TimeSpan.FromSeconds(30),
+                    onBreak: (outcome, duration) =>
+                    {
+                        Console.WriteLine(
+                            $"[POLLY CIRCUIT BREAKER] Circuit opened for {duration.TotalSeconds}s. " +
+                            $"Reason: {outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString()}");
+                    },
+                    onReset: () =>
+                    {
+                        Console.WriteLine("[POLLY CIRCUIT BREAKER] Circuit closed. Resuming normal operations.");
+                    },
+                    onHalfOpen: () =>
+                    {
+                        Console.WriteLine("[POLLY CIRCUIT BREAKER] Circuit half-open. Testing if service recovered.");
+                    });
         }
     }
 }

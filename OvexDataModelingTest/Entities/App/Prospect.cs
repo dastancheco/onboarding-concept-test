@@ -10,6 +10,7 @@ namespace OvexDataModelingTest.Entities.App
         public int WorkflowId { get; set; }
         public string Status { get; set; } // "IN_PROGRESS", "APPROVED"
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
         public int? CurrentStepId { get; set; }
     }
 }

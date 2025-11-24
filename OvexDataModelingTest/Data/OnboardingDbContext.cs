@@ -26,5 +26,6 @@ namespace OvexDataModelingTest.Data
         public DbSet<CustomerData> CustomerData { get; set; }
         public DbSet<Prospect> Prospects { get; set; }
         public DbSet<ProspectData> ProspectData { get; set; }
+        public DbSet<ProspectStatusHistory> ProspectStatusHistory { get; set; }
     }
 }
