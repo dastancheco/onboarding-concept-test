@@ -11,7 +11,7 @@ namespace Onboarding.Core.Services
     /// Pipeline de validación que ejecuta múltiples validadores en secuencia.
     /// Aplica Chain of Responsibility Pattern.
     /// </summary>
-    public class ValidationPipeline
+    public class ValidationPipeline : IValidationPipeline
     {
         private readonly Dictionary<string, IFieldValidator> _validators;
 
@@ -120,12 +120,11 @@ namespace Onboarding.Core.Services
             object? config)
         {
             if (!_validators.TryGetValue(validatorType.ToUpperInvariant(), out var validator))
-                return null; // Validador no encontrado, ignorar
+                return null; 
 
             if (validator.IsValid(value, config))
-                return null; // Validación exitosa
+                return null; 
 
-            // Validación falló, crear error
             return new ValidationError
             {
                 FieldKey = fieldKey,
@@ -146,7 +145,7 @@ namespace Onboarding.Core.Services
                 "RANGE" => "OUT_OF_RANGE",
                 "LENGTH" => "INVALID_LENGTH",
                 "ALLOWED_VALUES" => "INVALID_VALUE",
-                _ => "INVALID_FORMAT" // RFC, CURP, EMAIL, etc.
+                _ => "INVALID_FORMAT" 
             };
         }
 

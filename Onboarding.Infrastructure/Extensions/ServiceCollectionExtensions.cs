@@ -31,24 +31,24 @@ namespace Onboarding.Infrastructure.Extensions
 
             // 3. Servicios del Core - ARQUITECTURA PRINCIPAL
             services.AddScoped<IOrchestratorService, OrchestratorService>();
-            services.AddScoped<RuleEngine>();
-            services.AddScoped<StepValidationService>();
+            services.AddScoped<IRuleEngine, RuleEngine>();
+            services.AddScoped<IStepValidationService, StepValidationService>();
 
-            // 4. SPRINT 1: PERSISTENCIA DE DATOS
+            // 4. PERSISTENCIA DE DATOS
             services.AddScoped<IProspectDataService, ProspectDataService>();
             services.AddScoped<ICustomerDataService, CustomerDataService>();
             services.AddScoped<IUserManagementService, UserManagementService>();
             
-            // 5. SPRINT 1 - OPCIÓN C: GESTIÓN DE ESTADOS Y RUTEO
+            // 5. OPCIÓN C: GESTIÓN DE ESTADOS Y RUTEO
             services.AddScoped<IProspectStatusService, ProspectStatusService>();
             services.AddScoped<IWorkflowRoutingService, WorkflowRoutingService>();
 
-            // 6. SPRINT 2: EVENT PUBLISHER
+            // 6. EVENT PUBLISHER
             // Usar InMemoryEventPublisher para desarrollo/testing
             // En producción, reemplazar con GooglePubSubPublisher
             services.AddScoped<IEventPublisher, InMemoryEventPublisher>();
 
-            // 7. SPRINT 2: HTTP CLIENT CON POLLY (Resiliencia)
+            // 7. HTTP CLIENT CON POLLY (Resiliencia)
             services.AddHttpClient("ExternalAPIs")
                 .AddPolicyHandler(GetRetryPolicy())
                 .AddPolicyHandler(GetCircuitBreakerPolicy())
@@ -71,14 +71,11 @@ namespace Onboarding.Infrastructure.Extensions
             services.AddSingleton<IOperatorStrategy, ContainsStrategy>();
 
             // 10. VALIDADORES DE CAMPOS (Strategy Pattern)
-            // Built-in validators
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RequiredValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RangeValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.LengthValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.DataTypeValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.AllowedValuesValidator>();
-            
-            // Domain-specific validators
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RfcValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.CurpValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.EmailValidator>();
@@ -89,7 +86,7 @@ namespace Onboarding.Infrastructure.Extensions
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RegexValidator>();
 
             // Validation pipeline
-            services.AddScoped<ValidationPipeline>();
+            services.AddScoped<IValidationPipeline, ValidationPipeline>();
 
             return services;
         }

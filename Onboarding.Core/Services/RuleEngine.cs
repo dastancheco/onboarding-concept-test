@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Onboarding.Core.Services
 {
-    public class RuleEngine
+    public class RuleEngine : IRuleEngine
     {
         private readonly Dictionary<string, IOperatorStrategy> _strategies;
 
@@ -59,6 +59,7 @@ namespace Onboarding.Core.Services
             // 3. BÚSQUEDA DE ESTRATEGIA (OCP en acción)
             // Buscamos qué operador está presente en la cadena
             var strategy = _strategies.Values
+                .OrderByDescending(s => s.Symbol.Length)
                 .FirstOrDefault(s => condition.Contains(s.Symbol));
 
             if (strategy == null)

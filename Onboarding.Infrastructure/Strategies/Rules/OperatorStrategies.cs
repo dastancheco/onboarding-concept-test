@@ -49,4 +49,6 @@ namespace Onboarding.Infrastructure.Strategies.Rules
         public bool Evaluate(string left, string right)
             => left != null && right != null && left.Contains(right);
     }
+
+    
 }

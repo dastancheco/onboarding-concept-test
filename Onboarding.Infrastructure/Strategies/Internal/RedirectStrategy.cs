@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Nodes;
 
+using Onboarding.Core.Interfaces;
+
 namespace Onboarding.Infrastructure.Strategies.Internal
 {
     public class RedirectStrategy : IConcreteStrategy

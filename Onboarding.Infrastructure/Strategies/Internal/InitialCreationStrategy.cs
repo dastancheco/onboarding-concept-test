@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using Onboarding.Core.Interfaces;
+
 namespace Onboarding.Infrastructure.Strategies.Internal
 {
     public class InitialCreationStrategy : IConcreteStrategy

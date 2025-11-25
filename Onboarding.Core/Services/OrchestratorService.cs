@@ -17,8 +17,8 @@ namespace Onboarding.Core.Services
         private readonly IRepository<Prospect> _prospectRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IActionExecutor _actionExecutor;
-        private readonly RuleEngine _ruleEngine;
-        private readonly StepValidationService _validator;
+        private readonly IRuleEngine _ruleEngine;
+        private readonly IStepValidationService _validator;
         private readonly IProspectDataService _prospectDataService;
         private readonly ICustomerDataService _customerDataService;
         private readonly IUserManagementService _userManagementService;
@@ -30,8 +30,8 @@ namespace Onboarding.Core.Services
             IRepository<Prospect> prospectRepo,
             IUnitOfWork unitOfWork,
             IActionExecutor actionExecutor,
-            RuleEngine ruleEngine,
-            StepValidationService validator,
+            IRuleEngine ruleEngine,
+            IStepValidationService validator,
             IProspectDataService prospectDataService,
             ICustomerDataService customerDataService,
             IUserManagementService userManagementService,
@@ -101,7 +101,7 @@ namespace Onboarding.Core.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to recover context");
-                return;
+                throw; // Rethrow para manejo superior;
             }
            
             // 3. Evaluar Reglas con el ID correcto

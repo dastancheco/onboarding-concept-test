@@ -16,17 +16,17 @@ namespace Onboarding.Core.Services
     /// Orquesta la validación delegando TODA la lógica a validadores.
     /// Aplica SRP: Solo coordina, no valida directamente.
     /// </summary>
-    public class StepValidationService
+    public class StepValidationService : IStepValidationService
     {
         private readonly IRepository<Step_Field> _stepFieldsRepo;
         private readonly IRepository<FieldDefinition> _fieldsRepo;
-        private readonly ValidationPipeline _validationPipeline;
+        private readonly IValidationPipeline _validationPipeline;
         private readonly ILogger<StepValidationService> _logger;
 
         public StepValidationService(
             IRepository<Step_Field> stepFieldsRepo,
             IRepository<FieldDefinition> fieldsRepo,
-            ValidationPipeline validationPipeline,
+            IValidationPipeline validationPipeline,
             ILogger<StepValidationService> logger)
         {
             _stepFieldsRepo = stepFieldsRepo;

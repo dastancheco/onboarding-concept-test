@@ -6,6 +6,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
+using Onboarding.Core.Interfaces;
+
 namespace Onboarding.Infrastructure.Strategies.External
 {
     public class ExternalApiStrategy : IConcreteStrategy
