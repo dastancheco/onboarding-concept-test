@@ -14,12 +14,12 @@ namespace Onboarding.Core.Services
     public class WorkflowRoutingService : IWorkflowRoutingService
     {
         private readonly IRepository<WorkflowRoutingRule> _routingRepo;
-        private readonly RuleEngine _ruleEngine;
+        private readonly IRuleEngine _ruleEngine;
         private readonly ILogger<WorkflowRoutingService> _logger;
 
         public WorkflowRoutingService(
             IRepository<WorkflowRoutingRule> routingRepo,
-            RuleEngine ruleEngine,
+            IRuleEngine ruleEngine,
             ILogger<WorkflowRoutingService> logger)
         {
             _routingRepo = routingRepo;
@@ -31,7 +31,9 @@ namespace Onboarding.Core.Services
         {
             _logger.LogInformation("Determining workflow for payload");
 
-            var routingRules = (await _routingRepo.GetAllAsync()).OrderBy(r => r.Priority);
+            // Ordenar por Priority DESCENDENTE: prioridades más altas se evalúan primero
+            var routingRules = (await _routingRepo.GetAllAsync())
+                .OrderByDescending(r => r.Priority);
 
             foreach (var rule in routingRules)
             {

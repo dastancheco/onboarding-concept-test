@@ -10,9 +10,6 @@ namespace OvexDataModelingTest.Entities.Config
         [Key]
         public int RoutingRuleId { get; set; }
 
-        [Required, MaxLength(20)]
-        public string TargetWorkflowType { get; set; } // "PROSPECT"
-
         public int Priority { get; set; } // 10, 20...
 
         [Required]

@@ -1,0 +1,673 @@
+@page
+@model Onboarding.TestClient.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard - Monitor de Prospectos";
+}
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Dashboard de Prospectos
+            </h1>
+            <p class="text-muted">Monitor y estadísticas en tiempo real</p>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    @if (Model.Statistics != null)
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-white-50">Total Prospectos</h6>
+                                <h2 class="card-title mb-0 fw-bold">@Model.Statistics.Summary.TotalProspects</h2>
+                            </div>
+                            <i class="bi bi-people fs-1 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-white-50">Activos</h6>
+                                <h2 class="card-title mb-0 fw-bold">@Model.Statistics.Summary.ActiveProspects</h2>
+                            </div>
+                            <i class="bi bi-arrow-repeat fs-1 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-white-50">Completados</h6>
+                                <h2 class="card-title mb-0 fw-bold">@Model.Statistics.Summary.CompletedProspects</h2>
+                            </div>
+                            <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-white-50">Promedio Días</h6>
+                                <h2 class="card-title mb-0 fw-bold">@Model.Statistics.Summary.AverageCompletionDays.ToString("F1")</h2>
+                            </div>
+                            <i class="bi bi-clock-history fs-1 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link @(Model.ActiveTab == "overview" ? "active" : "")" 
+               asp-page="/Dashboard" asp-route-tab="overview">
+                <i class="bi bi-house me-2"></i>Resumen
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.ActiveTab == "prospects" ? "active" : "")" 
+               asp-page="/Dashboard" asp-route-tab="prospects">
+                <i class="bi bi-list-ul me-2"></i>Prospectos
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.ActiveTab == "timeline" ? "active" : "")" 
+               asp-page="/Dashboard" asp-route-tab="timeline">
+                <i class="bi bi-clock me-2"></i>Actividad
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.ActiveTab == "search" ? "active" : "")" 
+               asp-page="/Dashboard" asp-route-tab="search">
+                <i class="bi bi-search me-2"></i>Búsqueda
+            </a>
+        </li>
+    </ul>
+
+    <!-- Content based on active tab -->
+    @if (Model.ActiveTab == "overview")
+    {
+        <div class="row">
+            <!-- Charts Column -->
+            <div class="col-lg-8 mb-4">
+                <!-- Status Distribution Chart -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-pie-chart me-2"></i>
+                            Distribución por Estado
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Workflow Distribution Chart -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-bar-chart me-2"></i>
+                            Prospectos por Workflow
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="workflowChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Column -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-activity me-2"></i>
+                            Actividad Reciente
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.Timeline?.Timeline.Any() == true)
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var evt in Model.Timeline.Timeline.Take(10))
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi @Model.GetEventTypeIcon(evt.EventType) @Model.GetEventTypeColor(evt.EventType) fs-5 me-3 mt-1"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1">@evt.UserEmail</h6>
+                                                    <small class="text-muted">@evt.EventDate.ToString("HH:mm")</small>
+                                                </div>
+                                                <p class="mb-1 small">
+                                                    <span class="badge bg-light text-dark">@evt.WorkflowName</span>
+                                                    <span class="@Model.GetStatusBadgeClass(evt.Status)">@Model.GetStatusText(evt.Status)</span>
+                                                </p>
+                                                <small class="text-muted">@evt.EventDate.ToString("dd/MM/yyyy")</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="p-4 text-center text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                <p>No hay actividad reciente</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.ActiveTab == "prospects")
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-people me-2"></i>
+                            Lista de Prospectos
+                        </h5>
+                    </div>
+                    <div class="col-md-4">
+                        <form method="get" class="d-flex gap-2">
+                            <input type="hidden" name="tab" value="prospects" />
+                            <select name="StatusFilter" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">Todos los estados</option>
+                                <option value="IN_PROGRESS" selected="@(Model.StatusFilter == "IN_PROGRESS")">En Progreso</option>
+                                <option value="COMPLETED" selected="@(Model.StatusFilter == "COMPLETED")">Completado</option>
+                                <option value="REJECTED" selected="@(Model.StatusFilter == "REJECTED")">Rechazado</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.ProspectList?.Prospects.Any() == true)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Workflow</th>
+                                    <th>Estado</th>
+                                    <th>Step Actual</th>
+                                    <th>Días Activo</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var prospect in Model.ProspectList.Prospects)
+                                {
+                                    <tr>
+                                        <td>
+                                            <i class="bi bi-person-circle me-2"></i>
+                                            @prospect.UserEmail
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">@prospect.WorkflowName</span>
+                                        </td>
+                                        <td>
+                                            <span class="@Model.GetStatusBadgeClass(prospect.Status)">
+                                                @Model.GetStatusText(prospect.Status)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@prospect.CurrentStepName</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@prospect.DaysActive días</span>
+                                        </td>
+                                        <td>
+                                            <small>@prospect.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-outline-primary js-prospect-detail-btn" title="Ver detalles" data-id="@prospect.ProspectId">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model.ProspectList.TotalPages > 1)
+                    {
+                        <div class="card-footer bg-white">
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0 justify-content-center">
+                                    @for (int i = 1; i <= Model.ProspectList.TotalPages; i++)
+                                    {
+                                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                            <a class="page-link" asp-page="/Dashboard" 
+                                               asp-route-tab="prospects" 
+                                               asp-route-CurrentPage="@i"
+                                               asp-route-StatusFilter="@Model.StatusFilter">@i</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                        <p>No se encontraron prospectos</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (Model.ActiveTab == "timeline")
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Línea de Tiempo (Últimos 30 días)
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Timeline?.Timeline.Any() == true)
+                {
+                    <div class="timeline">
+                        @foreach (var evt in Model.Timeline.Timeline)
+                        {
+                            <div class="timeline-item mb-4">
+                                <div class="d-flex">
+                                    <div class="timeline-marker">
+                                        <i class="bi @Model.GetEventTypeIcon(evt.EventType) @Model.GetEventTypeColor(evt.EventType)"></i>
+                                    </div>
+                                    <div class="timeline-content flex-grow-1 ms-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="mb-0">@evt.UserEmail</h6>
+                                                    <small class="text-muted">@evt.EventDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                                </div>
+                                                <p class="mb-2">
+                                                    <span class="badge bg-light text-dark me-2">@evt.WorkflowName</span>
+                                                    <span class="@Model.GetStatusBadgeClass(evt.Status)">@Model.GetStatusText(evt.Status)</span>
+                                                </p>
+                                                <small class="text-muted">
+                                                    Evento: <strong>@evt.EventType</strong>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                        <p>No hay actividad registrada</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (Model.ActiveTab == "search")
+    {
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-search me-2"></i>
+                            Buscar Prospectos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get">
+                            <input type="hidden" name="tab" value="search" />
+                            <div class="input-group input-group-lg mb-4">
+                                <input type="text" name="SearchQuery" class="form-control" 
+                                       placeholder="Buscar por email o ID..." 
+                                       value="@Model.SearchQuery" required />
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-search me-2"></i>Buscar
+                                </button>
+                            </div>
+                        </form>
+
+                        @if (Model.SearchResults != null)
+                        {
+                            <h6 class="mb-3">
+                                Resultados: <span class="badge bg-primary">@Model.SearchResults.Count</span>
+                            </h6>
+
+                            @if (Model.SearchResults.Results.Any())
+                            {
+                                <div class="list-group">
+                                    @foreach (var result in Model.SearchResults.Results)
+                                    {
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">
+                                                        <i class="bi bi-person-circle me-2"></i>
+                                                        @result.UserEmail
+                                                    </h6>
+                                                    <p class="mb-1">
+                                                        <span class="badge bg-light text-dark me-2">@result.WorkflowName</span>
+                                                        <span class="@Model.GetStatusBadgeClass(result.Status)">@Model.GetStatusText(result.Status)</span>
+                                                    </p>
+                                                    <small class="text-muted">
+                                                        Creado: @result.CreatedAt.ToString("dd/MM/yyyy HH:mm") | 
+                                                        Coincidencia: <strong>@result.MatchType</strong>
+                                                    </small>
+                                                </div>
+                                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> Ver
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    No se encontraron resultados para "<strong>@Model.SearchQuery</strong>"
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal para Detalle de Prospecto -->
+<div class="modal fade" id="prospectDetailModal" tabindex="-1" aria-labelledby="prospectDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="prospectDetailModalLabel">Detalle del Prospecto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="prospectDetailContent">
+          <div class="text-center text-muted py-4">
+            <div class="spinner-border" role="status"></div>
+            <p class="mt-3">Cargando detalles...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Status Distribution Chart
+        @if (Model.Statistics?.ByStatus != null && Model.ActiveTab == "overview")
+        {
+            <text>
+            const statusData = {
+                labels: [@Html.Raw(string.Join(",", Model.Statistics.ByStatus.Select(s => $"'{Model.GetStatusText(s.Status)}'")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.Statistics.ByStatus.Select(s => s.Count))],
+                    backgroundColor: [
+                        'rgba(13, 110, 253, 0.8)',
+                        'rgba(25, 135, 84, 0.8)',
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(13, 202, 240, 0.8)',
+                        'rgba(108, 117, 125, 0.8)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            };
+
+            new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: statusData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Workflow Distribution Chart
+            const workflowData = {
+                labels: [@Html.Raw(string.Join(",", Model.Statistics.ByWorkflow.Select(w => $"'{w.WorkflowName}'")))],
+                datasets: [{
+                    label: 'Activos',
+                    data: [@string.Join(",", Model.Statistics.ByWorkflow.Select(w => w.Active))],
+                    backgroundColor: 'rgba(25, 135, 84, 0.8)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Completados',
+                    data: [@string.Join(",", Model.Statistics.ByWorkflow.Select(w => w.Completed))],
+                    backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            new Chart(document.getElementById('workflowChart'), {
+                type: 'bar',
+                data: workflowData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            </text>
+        }
+
+        // Detalle de Prospecto - Modal
+        // Removed server-side Razor interpolation from JS. Use client-side mapping for status display.
+
+        // Client-side status mapping
+        function getStatusBadgeClass(status) {
+            switch ((status || '').toUpperCase()) {
+                case 'IN_PROGRESS': return 'badge bg-info';
+                case 'COMPLETED': return 'badge bg-success';
+                case 'REJECTED': return 'badge bg-danger';
+                case 'APPROVED': return 'badge bg-success';
+                default: return 'badge bg-secondary';
+            }
+        }
+        function getStatusText(status) {
+            switch ((status || '').toUpperCase()) {
+                case 'IN_PROGRESS': return 'En Progreso';
+                case 'COMPLETED': return 'Completado';
+                case 'REJECTED': return 'Rechazado';
+                case 'APPROVED': return 'Aprobado';
+                default: return status || 'Desconocido';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Delegar click en todos los botones de detalle
+            document.querySelectorAll('.js-prospect-detail-btn').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var prospectId = btn.getAttribute('data-id');
+                    showProspectDetailModal(prospectId);
+                });
+            });
+        });
+
+        function showProspectDetailModal(prospectId) {
+            var modalEl = document.getElementById('prospectDetailModal');
+            var modal = new bootstrap.Modal(modalEl);
+            var contentDiv = document.getElementById('prospectDetailContent');
+            var modalTitle = modalEl.querySelector('.modal-title');
+            contentDiv.innerHTML = '<div class="text-center text-muted py-4"><div class="spinner-border" role="status"></div><p class="mt-3">Cargando detalles...</p></div>';
+            modal.show();
+
+            // Call the page handler which uses IOnboardingApiClient internally
+            fetch(`/Dashboard?handler=ProspectDetail&prospectId=${encodeURIComponent(prospectId)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('No se pudo obtener el detalle');
+                    return response.json();
+                })
+                .then(data => {
+                    modalTitle.textContent = 'Detalle del Prospecto - ' + (data.userEmail || data.email || '');
+                    contentDiv.innerHTML = renderProspectDetail(data);
+                })
+                .catch(err => {
+                    contentDiv.innerHTML = `<div class='alert alert-danger'>Error al cargar detalles: ${err.message}</div>`;
+                });
+        }
+
+        function renderProspectDetail(data) {
+            if (!data) return '<div class="alert alert-warning">No se encontraron datos</div>';
+            var badgeClass = getStatusBadgeClass(data.status);
+            var statusText = getStatusText(data.status);
+            var lastEvent = data.lastEvent || {};
+            return `
+                <dl class="row">
+                    <dt class="col-sm-4">ID</dt><dd class="col-sm-8">${data.prospectId}</dd>
+                    <dt class="col-sm-4">Usuario</dt><dd class="col-sm-8">${data.userId || data.userEmail || ''}</dd>
+                    <dt class="col-sm-4">Workflow</dt><dd class="col-sm-8">${data.workflowName || data.workflowId || ''}</dd>
+                    <dt class="col-sm-4">Estado</dt><dd class="col-sm-8"><span class="${badgeClass}" style="padding:0.2rem 0.4rem;border-radius:0.2rem;">${statusText}</span></dd>
+                    <dt class="col-sm-4">Creado</dt><dd class="col-sm-8">${data.createdAt ? new Date(data.createdAt).toLocaleString() : ''}</dd>
+                    <dt class="col-sm-4">Días Activo</dt><dd class="col-sm-8">${data.daysActive || ''}</dd>
+                </dl>
+                <h6 class="mt-4">Última Actividad</h6>
+                <p><strong>Tipo de Evento:</strong> ${lastEvent.eventType || ''}</p>
+                <p><strong>Fecha del Evento:</strong> ${lastEvent.eventDate ? new Date(lastEvent.eventDate).toLocaleString() : ''}</p>
+                <p><strong>Usuario:</strong> ${lastEvent.userEmail || ''}</p>
+                <h6 class="mt-4">Datos del Prospecto</h6>
+                <pre class="bg-light p-3 rounded small">${JSON.stringify(data.data || data.prospectData || {}, null, 2)}</pre>
+            `;
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item {
+            position: relative;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -2rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: -1.4rem;
+            top: 2.5rem;
+            bottom: -2rem;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            background: transparent;
+        }
+    </style>
+}

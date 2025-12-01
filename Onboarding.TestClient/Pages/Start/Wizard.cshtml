@@ -1,0 +1,711 @@
+@page
+@model Onboarding.TestClient.Pages.Start.WizardModel
+@{
+    ViewData["Title"] = "Proceso de Onboarding";
+    
+    // Determinar estilo según tipo
+    var styleClass = Model.OnboardingType switch
+    {
+        "OVEX_CLIENT" => "ovex-client-style",
+        "OVEX_FLEET" => "ovex-fleet-style",
+        "PCH_PM" => "pch-pm-style",
+        _ => "default-style"
+    };
+    
+    var brandName = Model.OnboardingType switch
+    {
+        "OVEX_CLIENT" => "OVEX - Cliente Individual",
+        "OVEX_FLEET" => "OVEX - Flotilla Empresarial",
+        "PCH_PM" => "PCH Capital - Persona Moral",
+        _ => "Onboarding"
+    };
+}
+
+<div class="wizard-page @styleClass">
+    <div class="container py-5">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Error:</strong> @Model.ErrorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="mt-3">
+                    <a asp-page="/Index" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Volver al inicio
+                    </a>
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="success-card text-center">
+                        <div class="success-icon mb-4">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <h2 class="mb-3">¡Proceso Completado!</h2>
+                        <p class="lead mb-4">@Model.SuccessMessage</p>
+                        <div class="collected-data mb-4">
+                            <h5>Datos Recopilados:</h5>
+                            <p class="text-muted">Email: @Model.UserEmail</p>
+                        </div>
+                        <a asp-page="/Index" class="btn btn-primary btn-lg">
+                            <i class="bi bi-house me-2"></i>
+                            Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (Model.WorkflowConfig != null && Model.CurrentStep != null)
+        {
+            <!-- Header -->
+            <div class="wizard-header text-center mb-4">
+                <h2 class="brand-name">@brandName</h2>
+                <p class="user-email">
+                    <i class="bi bi-envelope me-2"></i>
+                    @Model.UserEmail
+                </p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-section mb-4">
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar" 
+                         role="progressbar" 
+                         style="width: @(((Model.CurrentStepIndex + 1) * 100.0 / Model.TotalSteps).ToString("F1"))%"
+                         aria-valuenow="@(Model.CurrentStepIndex + 1)" 
+                         aria-valuemin="0" 
+                         aria-valuemax="@Model.TotalSteps">
+                    </div>
+                </div>
+                <p class="progress-text text-center mt-2">
+                    Paso @(Model.CurrentStepIndex + 1) de @Model.TotalSteps
+                </p>
+            </div>
+
+            <!-- Main Card -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="wizard-card">
+                        <!-- Phase & Step Info -->
+                        <div class="step-header mb-4">
+                            <span class="phase-badge">@Model.CurrentPhase.Name</span>
+                            <h3 class="step-title mt-2">@Model.CurrentStep.Name</h3>
+                        </div>
+
+                        <!-- Form -->
+                        <form method="post">
+                            <input type="hidden" name="currentStepIndex" value="@Model.CurrentStepIndex" />
+                            
+                            @foreach (var field in Model.CurrentStep.Fields.OrderBy(f => f.FieldId))
+                            {
+                                <div class="mb-4">
+                                    <label for="field_@field.FieldKey" class="form-label">
+                                        @field.Label
+                                        @if (field.IsRequired)
+                                        {
+                                            <span class="text-danger">*</span>
+                                        }
+                                    </label>
+
+                                    @if (field.AllowedValues != null && field.AllowedValues.Any())
+                                    {
+                                        <!-- Select dropdown -->
+                                        <select class="form-select form-select-lg" 
+                                                id="field_@field.FieldKey" 
+                                                name="field_@field.FieldKey"
+                                                required="@field.IsRequired">
+                                            <option value="">Selecciona una opción...</option>
+                                            @foreach (var value in field.AllowedValues)
+                                            {
+                                                <option value="@value">@value</option>
+                                            }
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        switch (field.DataType.ToUpper())
+                                        {
+                                            case "EMAIL":
+                                                <input type="email" 
+                                                       class="form-control form-control-lg" 
+                                                       id="field_@field.FieldKey" 
+                                                       name="field_@field.FieldKey"
+                                                       placeholder="@field.Placeholder"
+                                                       required="@field.IsRequired">
+                                                break;
+                                            
+                                            case "PHONE":
+                                                <input type="tel" 
+                                                       class="form-control form-control-lg" 
+                                                       id="field_@field.FieldKey" 
+                                                       name="field_@field.FieldKey"
+                                                       placeholder="@field.Placeholder"
+                                                       required="@field.IsRequired">
+                                                break;
+                                            
+                                            case "NUMBER":
+                                            case "INTEGER":
+                                                <input type="number" 
+                                                       class="form-control form-control-lg" 
+                                                       id="field_@field.FieldKey" 
+                                                       name="field_@field.FieldKey"
+                                                       placeholder="@field.Placeholder"
+                                                       min="@field.MinValue"
+                                                       max="@field.MaxValue"
+                                                       required="@field.IsRequired">
+                                                break;
+                                            
+                                            case "DATE":
+                                                <input type="date" 
+                                                       class="form-control form-control-lg" 
+                                                       id="field_@field.FieldKey" 
+                                                       name="field_@field.FieldKey"
+                                                       required="@field.IsRequired">
+                                                break;
+                                            
+                                            case "TEXT":
+                                                <textarea class="form-control form-control-lg" 
+                                                          id="field_@field.FieldKey" 
+                                                          name="field_@field.FieldKey"
+                                                          rows="4"
+                                                          placeholder="@field.Placeholder"
+                                                          required="@field.IsRequired"></textarea>
+                                                break;
+                                            
+                                            case "BOOLEAN":
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" 
+                                                           type="checkbox" 
+                                                           id="field_@field.FieldKey" 
+                                                           name="field_@field.FieldKey"
+                                                           value="true">
+                                                    <label class="form-check-label" for="field_@field.FieldKey">
+                                                        Sí
+                                                    </label>
+                                                </div>
+                                                break;
+
+                                            case "OBJECT_ARRAY":
+                                                <!-- NUEVO: Renderizar array dinámico de objetos -->
+                                                <div class="object-array-container" id="container_@field.FieldKey" data-field-key="@field.FieldKey">
+                                                    <div class="array-items" id="items_@field.FieldKey">
+                                                        <!-- Los items se agregarán dinámicamente aquí -->
+                                                    </div>
+                                                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addArrayItem('@field.FieldKey')">
+                                                        <i class="bi bi-plus-circle me-1"></i>
+                                                        Agregar @field.Label
+                                                    </button>
+                                                    <input type="hidden" id="field_@field.FieldKey" name="field_@field.FieldKey" value="[]">
+                                                </div>
+                                                break;
+                                            
+                                            default:
+                                                <input type="text" 
+                                                       class="form-control form-control-lg" 
+                                                       id="field_@field.FieldKey" 
+                                                       name="field_@field.FieldKey"
+                                                       placeholder="@field.Placeholder"
+                                                       minlength="@field.MinLength"
+                                                       maxlength="@field.MaxLength"
+                                                       pattern="@field.Pattern"
+                                                       required="@field.IsRequired">
+                                                break;
+                                        }
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(field.HelpText))
+                                    {
+                                        <div class="form-text">@field.HelpText</div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    @if (Model.CurrentStepIndex + 1 < Model.TotalSteps)
+                                    {
+                                        <span>Siguiente</span>
+                                        <i class="bi bi-arrow-right ms-2"></i>
+                                    }
+                                    else
+                                    {
+                                        <span>Finalizar</span>
+                                        <i class="bi bi-check-circle ms-2"></i>
+                                    }
+                                </button>
+                                
+                                @if (Model.CurrentStepIndex > 0)
+                                {
+                                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i>
+                                        Anterior
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-page="/Index" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-2"></i>
+                                        Cancelar
+                                    </a>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Base Styles */
+    .wizard-page {
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+
+    /* OVEX Client Style */
+    .ovex-client-style {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .ovex-client-style .wizard-card {
+        border-top: 5px solid #4facfe;
+    }
+
+    .ovex-client-style .btn-primary {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border: none;
+    }
+
+    .ovex-client-style .progress-bar {
+        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .ovex-client-style .phase-badge {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    /* OVEX Fleet Style */
+    .ovex-fleet-style {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .ovex-fleet-style .wizard-card {
+        border-top: 5px solid #fa709a;
+    }
+
+    .ovex-fleet-style .btn-primary {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        border: none;
+        color: white;
+    }
+
+    .ovex-fleet-style .progress-bar {
+        background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .ovex-fleet-style .phase-badge {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    /* PCH PM Style */
+    .pch-pm-style {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .pch-pm-style .wizard-card {
+        border-top: 5px solid #667eea;
+    }
+
+    .pch-pm-style .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    .pch-pm-style .progress-bar {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .pch-pm-style .phase-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Common Styles */
+    .wizard-header {
+        color: white;
+    }
+
+    .brand-name {
+        font-size: 2rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .user-email {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+    }
+
+    .progress-section {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .progress {
+        background-color: rgba(255,255,255,0.3);
+        border-radius: 10px;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        color: white;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .wizard-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .phase-badge {
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .step-title {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.05rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        padding: 12px 16px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: currentColor;
+        box-shadow: 0 0 0 0.25rem rgba(0,0,0,0.1);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        color: #5a6c7d;
+        font-weight: 600;
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 20px;
+        padding: 60px 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        color: #27ae60;
+    }
+
+    .collected-data {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    /* NUEVO: Estilos para OBJECT_ARRAY */
+    .object-array-container {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .array-item {
+        border-left: 4px solid currentColor;
+        transition: all 0.3s ease;
+    }
+
+    .array-item:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .array-items {
+        margin-bottom: 10px;
+    }
+
+    .array-item .card-body {
+        padding: 20px;
+    }
+
+    .array-item h6 {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+    // ==========================================
+    // MANEJO DE ARRAYS DINÁMICOS (OBJECT_ARRAY)
+    // ==========================================
+
+    // Esquemas de campos anidados (se cargan dinámicamente según el step)
+    const arraySchemas = {};
+
+    // Inicializar esquemas al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aquí se pueden cargar los esquemas desde el modelo si es necesario
+        // Por ahora, usaremos configuración en línea
+        initializeArrayFields();
+    });
+
+    function initializeArrayFields() {
+        const containers = document.querySelectorAll('.object-array-container');
+        containers.forEach(container => {
+            const fieldKey = container.dataset.fieldKey;
+            // Agregar un item inicial si el campo es requerido
+            const itemsContainer = document.getElementById(`items_${fieldKey}`);
+            if (itemsContainer && itemsContainer.children.length === 0) {
+                addArrayItem(fieldKey);
+            }
+        });
+    }
+
+    function addArrayItem(fieldKey) {
+        const itemsContainer = document.getElementById(`items_${fieldKey}`);
+        const itemCount = itemsContainer.children.length;
+        
+        // Obtener el esquema del campo (esto debería venir del servidor)
+        // Por ahora, usamos un esquema genérico
+        const schema = getFieldSchema(fieldKey);
+        
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'card mb-3 array-item';
+        itemDiv.dataset.index = itemCount;
+        
+        let itemHtml = `
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">${schema.label || fieldKey} #${itemCount + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeArrayItem('${fieldKey}', ${itemCount})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <div class="row">`;
+        
+        // Generar inputs para cada propiedad del esquema
+        schema.properties.forEach(prop => {
+            const inputId = `${fieldKey}_${itemCount}_${prop.key}`;
+            const inputName = `${fieldKey}[${itemCount}].${prop.key}`;
+            
+            itemHtml += `
+                <div class="col-md-6 mb-3">
+                    <label for="${inputId}" class="form-label">
+                        ${prop.label}
+                        ${prop.required ? '<span class="text-danger">*</span>' : ''}
+                    </label>`;
+            
+            // Renderizar input según el tipo
+            switch (prop.type.toUpperCase()) {
+                case 'NUMBER':
+                case 'INTEGER':
+                    itemHtml += `
+                        <input type="number" 
+                               class="form-control" 
+                               id="${inputId}" 
+                               data-property="${prop.key}"
+                               placeholder="${prop.placeholder || ''}"
+                               ${prop.required ? 'required' : ''}
+                               ${prop.min_value !== undefined ? `min="${prop.min_value}"` : ''}
+                               ${prop.max_value !== undefined ? `max="${prop.max_value}"` : ''}
+                               onchange="updateArrayData('${fieldKey}')">`;
+                    break;
+                case 'DATE':
+                    itemHtml += `
+                        <input type="date" 
+                               class="form-control" 
+                               id="${inputId}" 
+                               data-property="${prop.key}"
+                               ${prop.required ? 'required' : ''}
+                               onchange="updateArrayData('${fieldKey}')">`;
+                    break;
+                case 'EMAIL':
+                    itemHtml += `
+                        <input type="email" 
+                               class="form-control" 
+                               id="${inputId}" 
+                               data-property="${prop.key}"
+                               placeholder="${prop.placeholder || ''}"
+                               ${prop.required ? 'required' : ''}
+                               onchange="updateArrayData('${fieldKey}')">`;
+                    break;
+                default:
+                    itemHtml += `
+                        <input type="text" 
+                               class="form-control" 
+                               id="${inputId}" 
+                               data-property="${prop.key}"
+                               placeholder="${prop.placeholder || ''}"
+                               ${prop.required ? 'required' : ''}
+                               ${prop.min_length ? `minlength="${prop.min_length}"` : ''}
+                               ${prop.max_length ? `maxlength="${prop.max_length}"` : ''}
+                               ${prop.pattern ? `pattern="${prop.pattern}"` : ''}
+                               onchange="updateArrayData('${fieldKey}')">`;
+                    break;
+            }
+            
+            if (prop.help_text) {
+                itemHtml += `<div class="form-text">${prop.help_text}</div>`;
+            }
+            
+            itemHtml += `</div>`;
+        });
+        
+        itemHtml += `
+                </div>
+            </div>`;
+        
+        itemDiv.innerHTML = itemHtml;
+        itemsContainer.appendChild(itemDiv);
+        
+        // Actualizar el campo hidden con los datos
+        updateArrayData(fieldKey);
+    }
+
+    function removeArrayItem(fieldKey, index) {
+        const itemsContainer = document.getElementById(`items_${fieldKey}`);
+        const items = itemsContainer.querySelectorAll('.array-item');
+        
+        if (items.length > 1 || confirm('¿Estás seguro de eliminar este elemento?')) {
+            items[index].remove();
+            
+            // Re-indexar los items restantes
+            const remainingItems = itemsContainer.querySelectorAll('.array-item');
+            remainingItems.forEach((item, newIndex) => {
+                item.dataset.index = newIndex;
+                const title = item.querySelector('h6');
+                if (title) {
+                    const schema = getFieldSchema(fieldKey);
+                    title.textContent = `${schema.label || fieldKey} #${newIndex + 1}`;
+                }
+            });
+            
+            // Actualizar el campo hidden
+            updateArrayData(fieldKey);
+        }
+    }
+
+    function updateArrayData(fieldKey) {
+        const itemsContainer = document.getElementById(`items_${fieldKey}`);
+        const items = itemsContainer.querySelectorAll('.array-item');
+        const arrayData = [];
+        
+        items.forEach((item, index) => {
+            const itemData = {};
+            const inputs = item.querySelectorAll('input[data-property], select[data-property], textarea[data-property]');
+            
+            inputs.forEach(input => {
+                const propertyKey = input.dataset.property;
+                let value = input.value;
+                
+                // Convertir tipos
+                if (input.type === 'number') {
+                    value = value ? parseFloat(value) : null;
+                } else if (input.type === 'checkbox') {
+                    value = input.checked;
+                }
+                
+                if (value !== null && value !== '') {
+                    itemData[propertyKey] = value;
+                }
+            });
+            
+            arrayData.push(itemData);
+        });
+        
+        // Actualizar el campo hidden con JSON
+        const hiddenField = document.getElementById(`field_${fieldKey}`);
+        if (hiddenField) {
+            hiddenField.value = JSON.stringify(arrayData);
+        }
+    }
+
+    function getFieldSchema(fieldKey) {
+        // Esquemas predefinidos (idealmente esto vendría del servidor)
+        const schemas = {
+            'accionistas': {
+                label: 'Accionista',
+                properties: [
+                    {
+                        key: 'nombre',
+                        type: 'TEXT',
+                        label: 'Nombre Completo',
+                        required: true,
+                        min_length: 3,
+                        max_length: 100,
+                        placeholder: 'Ej: Juan Pérez García'
+                    },
+                    {
+                        key: 'participacion',
+                        type: 'NUMBER',
+                        label: 'Participación (%)',
+                        required: true,
+                        min_value: 0.01,
+                        max_value: 100,
+                        placeholder: 'Ej: 50',
+                        help_text: 'Porcentaje de participación (0.01 - 100)'
+                    },
+                    {
+                        key: 'rfc',
+                        type: 'TEXT',
+                        label: 'RFC',
+                        required: false,
+                        min_length: 12,
+                        max_length: 13,
+                        pattern: '^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$',
+                        placeholder: 'Ej: XAXX010101000'
+                    }
+                ]
+            }
+        };
+        
+        return schemas[fieldKey] || {
+            label: fieldKey,
+            properties: [
+                { key: 'nombre', type: 'TEXT', label: 'Nombre', required: true },
+                { key: 'valor', type: 'TEXT', label: 'Valor', required: true }
+            ]
+        };
+    }
+</script>

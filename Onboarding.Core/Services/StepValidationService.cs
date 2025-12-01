@@ -86,11 +86,27 @@ namespace Onboarding.Core.Services
                 // Obtener configuración efectiva (ConfigOverride tiene prioridad)
                 var effectiveConfig = GetEffectiveConfig(fieldDef.Config, stepFieldLink.ConfigOverride);
 
-                // Extraer valor del payload
-                var value = jsonNode?[fieldDef.FieldKey]?.ToString();
+                // NUEVO: Agregar nested_schema si existe
+                if (!string.IsNullOrWhiteSpace(fieldDef.NestedSchema))
+                {
+                    effectiveConfig["nested_schema"] = fieldDef.NestedSchema;
+                }
 
-                _logger.LogDebug("Validating field '{FieldKey}' with value: {Value}",
-                    fieldDef.FieldKey, value ?? "(null)");
+                // Extraer valor del payload
+                // NUEVO: Para OBJECT_ARRAY, serializar el nodo completo
+                string? value;
+                if (fieldDef.DataType.ToUpper() == "OBJECT_ARRAY")
+                {
+                    var arrayNode = jsonNode?[fieldDef.FieldKey];
+                    value = arrayNode?.ToJsonString();
+                }
+                else
+                {
+                    value = jsonNode?[fieldDef.FieldKey]?.ToString();
+                }
+
+                _logger.LogDebug("Validating field '{FieldKey}' (Type: {DataType}) with value: {Value}",
+                    fieldDef.FieldKey, fieldDef.DataType, value ?? "(null)");
 
                 // DELEGAR TODA LA VALIDACIÓN AL PIPELINE
                 var fieldErrors = _validationPipeline.ValidateField(

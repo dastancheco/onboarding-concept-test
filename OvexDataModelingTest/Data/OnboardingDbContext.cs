@@ -20,6 +20,11 @@ namespace OvexDataModelingTest.Data
         public DbSet<Step_Field> StepFields { get; set; }
         public DbSet<Rule> Rules { get; set; }
         public DbSet<InstanceActionStrategy> InstanceActionStrategies { get; set; }
+        
+        // Validation System
+        public DbSet<ValidationPipeline> ValidationPipelines { get; set; }
+        public DbSet<ValidationProvider> ValidationProviders { get; set; }
+        public DbSet<PipelineStep> PipelineSteps { get; set; }
 
         // App Schema
         public DbSet<User> Users { get; set; }

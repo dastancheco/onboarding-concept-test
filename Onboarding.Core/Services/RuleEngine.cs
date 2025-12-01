@@ -75,15 +75,38 @@ namespace Onboarding.Core.Services
             var leftRaw = parts[0].Trim();
             var rightRaw = parts[1].Trim();
 
-            // A. Resolver valor del JSON (Izquierda)
-            var jsonPath = leftRaw.Replace("input.", "").Replace("data.", "").Replace("prospect.", "");
-            var leftValue = jsonNode[jsonPath]?.ToString();
+            // A. Resolver valor del JSON (Izquierda) - Soportar navegación anidada
+            var leftValue = ResolveJsonPath(jsonNode, leftRaw);
 
             // B. Resolver valor constante (Derecha)
             var rightValue = rightRaw.Replace("'", "").Replace("\"", "");
 
             // C. DELEGAR EVALUACIÓN
             return strategy.Evaluate(leftValue, rightValue);
+        }
+
+        /// <summary>
+        /// Resuelve un path JSON que puede estar anidado (ej: "input.app_id", "data.country")
+        /// </summary>
+        private string? ResolveJsonPath(JsonNode jsonNode, string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+
+            // Dividir el path por puntos para navegar la estructura
+            var pathParts = path.Split('.');
+            JsonNode? currentNode = jsonNode;
+
+            foreach (var part in pathParts)
+            {
+                if (currentNode == null)
+                    return null;
+
+                // Intentar acceder al nodo hijo
+                currentNode = currentNode[part];
+            }
+
+            return currentNode?.ToString();
         }
     }
 }

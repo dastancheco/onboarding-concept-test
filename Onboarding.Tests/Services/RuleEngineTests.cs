@@ -50,7 +50,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_EqualsOperator_WithMatchingStrings_ReturnsTrue()
         {
             // Arrange
-            var expression = "data.status == 'active'";
+            var expression = "status == 'active'";  // Sin el prefijo "data."
             var jsonData = JsonSerializer.Serialize(new { status = "active" });
 
             // Act
@@ -67,7 +67,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_EqualsOperator_WithNonMatchingStrings_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.status == 'active'";
+            var expression = "status == 'active'";
             var jsonData = JsonSerializer.Serialize(new { status = "inactive" });
 
             // Act
@@ -84,7 +84,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_EqualsOperator_WithMatchingNumbers_ReturnsTrue()
         {
             // Arrange
-            var expression = "data.age == '25'";
+            var expression = "age == '25'";
             var jsonData = JsonSerializer.Serialize(new { age = 25 });
 
             // Act
@@ -105,7 +105,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_NotEqualsOperator_WithDifferentValues_ReturnsTrue()
         {
             // Arrange
-            var expression = "data.status != 'pending'";
+            var expression = "status != 'pending'";
             var jsonData = JsonSerializer.Serialize(new { status = "active" });
 
             // Act
@@ -122,7 +122,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_NotEqualsOperator_WithSameValues_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.status != 'active'";
+            var expression = "status != 'active'";
             var jsonData = JsonSerializer.Serialize(new { status = "active" });
 
             // Act
@@ -143,7 +143,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_GreaterThanOperator_ReturnsCorrectResult()
         {
             // Arrange
-            var expression = "data.score > '80'";
+            var expression = "score > '80'";
             var jsonData = JsonSerializer.Serialize(new { score = 85 });
 
             // Act
@@ -160,7 +160,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_GreaterThanOperator_WithLowerValue_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.score > '90'";
+            var expression = "score > '90'";
             var jsonData = JsonSerializer.Serialize(new { score = 85 });
 
             // Act
@@ -180,7 +180,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_GreaterOrEqualOperator_ReturnsCorrectResult(int score, bool expected)
         {
             // Arrange
-            var expression = "data.score >= '80'";
+            var expression = "score >= '80'";
             var jsonData = JsonSerializer.Serialize(new { score });
 
             // Act
@@ -201,7 +201,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_ContainsOperator_WithMatchingSubstring_ReturnsTrue()
         {
             // Arrange
-            var expression = "data.email CONTAINS '@example.com'";
+            var expression = "email CONTAINS '@example.com'";
             var jsonData = JsonSerializer.Serialize(new { email = "user@example.com" });
 
             // Act
@@ -218,7 +218,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_ContainsOperator_WithNonMatchingSubstring_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.email CONTAINS '@gmail.com'";
+            var expression = "email CONTAINS '@gmail.com'";
             var jsonData = JsonSerializer.Serialize(new { email = "user@example.com" });
 
             // Act
@@ -235,7 +235,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_ContainsOperator_WithPartialMatch_ReturnsTrue()
         {
             // Arrange
-            var expression = "data.name CONTAINS 'John'";
+            var expression = "name CONTAINS 'John'";
             var jsonData = JsonSerializer.Serialize(new { name = "John Doe" });
 
             // Act
@@ -256,7 +256,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_AndOperator_AllTrue_ReturnsTrue()
         {
             // Arrange
-            var expression = "data.status == 'active' && data.score > '70'";
+            var expression = "status == 'active' && score > '70'";
             var jsonData = JsonSerializer.Serialize(new { status = "active", score = 85 });
 
             // Act
@@ -273,7 +273,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_AndOperator_OneFalse_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.status == 'active' && data.score > '90'";
+            var expression = "status == 'active' && score > '90'";
             var jsonData = JsonSerializer.Serialize(new { status = "active", score = 85 });
 
             // Act
@@ -290,7 +290,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_OrOperator_OneTrue_ReturnsTrue()
         {
             // Arrange
-            var expression = "data.status == 'inactive' || data.score > '70'";
+            var expression = "status == 'inactive' || score > '70'";
             var jsonData = JsonSerializer.Serialize(new { status = "active", score = 85 });
 
             // Act
@@ -307,7 +307,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_OrOperator_AllFalse_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.status == 'inactive' || data.score > '100'";
+            var expression = "status == 'inactive' || score > '100'";
             var jsonData = JsonSerializer.Serialize(new { status = "active", score = 85 });
 
             // Act
@@ -324,7 +324,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_ComplexExpression_EvaluatesCorrectly()
         {
             // Arrange
-            var expression = "data.status == 'active' && data.score > '70' || data.country == 'MX'";
+            var expression = "status == 'active' && score > '70' || country == 'MX'";
             var jsonData = JsonSerializer.Serialize(new
             {
                 status = "inactive",
@@ -371,7 +371,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_WithNonExistentField_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.nonexistent == 'value'";
+            var expression = "nonexistent == 'value'";
             var jsonData = JsonSerializer.Serialize(new { other = "value" });
 
             // Act
@@ -388,7 +388,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_WithInvalidJson_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.status == 'active'";
+            var expression = "status == 'active'";
             var invalidJson = "{ invalid json }";
 
             // Act
@@ -405,7 +405,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_WithUnsupportedOperator_ReturnsFalse()
         {
             // Arrange
-            var expression = "data.status =~ 'active'"; // Operador regex no soportado
+            var expression = "status =~ 'active'"; // Operador regex no soportado
             var jsonData = JsonSerializer.Serialize(new { status = "active" });
 
             // Act
@@ -422,7 +422,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_WithNullValue_HandlesGracefully()
         {
             // Arrange
-            var expression = "data.optional == 'value'";
+            var expression = "optional == 'value'";
             var jsonData = JsonSerializer.Serialize(new { optional = (string?)null });
 
             // Act
@@ -485,7 +485,7 @@ namespace Onboarding.Tests.Services
         public void Evaluate_WithWhitespaceInValues_TrimsAndCompares()
         {
             // Arrange
-            var expression = "data.status == 'active'";
+            var expression = "status == 'active'";
             var jsonData = JsonSerializer.Serialize(new { status = " active " });
 
             // Act

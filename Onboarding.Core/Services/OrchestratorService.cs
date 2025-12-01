@@ -1,53 +1,39 @@
 ﻿using Onboarding.Core.Interfaces;
+using Onboarding.Core.Events;
 using OvexDataModelingTest.Entities.App;
 using OvexDataModelingTest.Entities.Config;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Logging;
 
 namespace Onboarding.Core.Services
 {
     /// <summary>
-    /// Orquestador principal del sistema.
+    /// Orquestador principal del sistema (REFACTORIZADO con Strategy Pattern).
     /// Aplica DIP: Dependency Inversion Principle - Depende de abstracciones (interfaces).
-    /// Aplica SRP: Delega responsabilidades específicas a servicios especializados.
+    /// Aplica SRP: Delega responsabilidades específicas a handlers y servicios especializados.
+    /// Aplica Strategy Pattern: Usa handlers intercambiables para cada tipo de evento.
     /// </summary>
     public class OrchestratorService : IOrchestratorService
     {
+        private readonly IEventHandlerFactory _handlerFactory;
         private readonly IRepository<Rule> _rulesRepo;
         private readonly IRepository<Prospect> _prospectRepo;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IActionExecutor _actionExecutor;
         private readonly IRuleEngine _ruleEngine;
-        private readonly IStepValidationService _validator;
-        private readonly IProspectDataService _prospectDataService;
-        private readonly ICustomerDataService _customerDataService;
-        private readonly IUserManagementService _userManagementService;
-        private readonly IWorkflowRoutingService _workflowRoutingService;
         private readonly ILogger<OrchestratorService> _logger;
 
         public OrchestratorService(
+            IEventHandlerFactory handlerFactory,
             IRepository<Rule> rulesRepo,
             IRepository<Prospect> prospectRepo,
-            IUnitOfWork unitOfWork,
             IActionExecutor actionExecutor,
             IRuleEngine ruleEngine,
-            IStepValidationService validator,
-            IProspectDataService prospectDataService,
-            ICustomerDataService customerDataService,
-            IUserManagementService userManagementService,
-            IWorkflowRoutingService workflowRoutingService,
             ILogger<OrchestratorService> logger)
         {
+            _handlerFactory = handlerFactory;
             _rulesRepo = rulesRepo;
             _prospectRepo = prospectRepo;
-            _unitOfWork = unitOfWork;
             _actionExecutor = actionExecutor;
             _ruleEngine = ruleEngine;
-            _validator = validator;
-            _prospectDataService = prospectDataService;
-            _customerDataService = customerDataService;
-            _userManagementService = userManagementService;
-            _workflowRoutingService = workflowRoutingService;
             _logger = logger;
         }
 
@@ -55,178 +41,154 @@ namespace Onboarding.Core.Services
         {
             _logger.LogInformation("Processing event: {EventType}", eventType);
 
-            // CASO 1: REGISTRO (No hay prospecto aún, usamos ruteo)
-            if (eventType == "UserRegistered")
+            // 1. Crear contexto del evento
+            var context = await BuildEventContextAsync(eventType, payloadJson);
+
+            // 2. Obtener handler específico para el evento
+            var handler = _handlerFactory.GetHandler(eventType);
+
+            if (handler != null)
             {
-                await HandleUserRegistration(payloadJson);
-                return;
-            }
-
-            // CASO 2: SEGUIMIENTO (Ya existe prospecto, buscamos su Workflow ID)
-            int workflowId = 0;
-            Guid prospectId = Guid.Empty;
-
-            try
-            {
-                // 1. Extraer prospect_id del JSON
-                var jsonNode = System.Text.Json.Nodes.JsonNode.Parse(payloadJson);
-                var prospectIdStr = jsonNode?["prospect_id"]?.ToString();
-
-                if (string.IsNullOrEmpty(prospectIdStr))
+                try
                 {
-                    _logger.LogError("Event requires 'prospect_id' in payload to identify the flow");
-                    return;
+                    // 3. Ejecutar handler específico
+                    await handler.HandleAsync(context);
+                    _logger.LogInformation("Event handler executed successfully for {EventType}", eventType);
                 }
-
-                prospectId = Guid.Parse(prospectIdStr);
-
-                // 2. Buscar el Prospecto en la BD para saber en qué Workflow está
-                var prospect = await _prospectRepo.GetByIdAsync(prospectId);
-
-                if (prospect == null)
+                catch (Exception ex)
                 {
-                    _logger.LogError("Prospect not found: {ProspectId}", prospectId);
-                    return;
-                }
-
-                workflowId = prospect.WorkflowId;
-                _logger.LogInformation("Context recovered: Prospect {ProspectId} belongs to Workflow {WorkflowId}", 
-                    prospectId, workflowId);
-                
-                if (eventType == "StepDataSubmitted")
-                {
-                    await HandleStepDataSubmission(prospect, payloadJson);
+                    _logger.LogError(ex, "Error executing handler for event: {EventType}", eventType);
+                    throw;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Failed to recover context");
-                throw; // Rethrow para manejo superior;
+                _logger.LogWarning("No specific handler found for event: {EventType}. Skipping handler execution.", eventType);
             }
-           
-            // 3. Evaluar Reglas con el ID correcto
-            await EvaluateWorkflowRules(eventType, payloadJson, workflowId, prospectId);
+
+            // 4. Evaluar reglas de negocio (siempre se ejecutan si hay contexto válido)
+            if (context.WorkflowId.HasValue)
+            {
+                await EvaluateWorkflowRules(context);
+            }
+            else
+            {
+                _logger.LogWarning("No WorkflowId in context. Skipping rule evaluation for event: {EventType}", eventType);
+            }
         }
 
         /// <summary>
-        /// Maneja el registro de un nuevo usuario.
-        /// Aplica SRP: Método con responsabilidad única y clara.
+        /// Construye el contexto del evento extrayendo información del payload.
         /// </summary>
-        private async Task HandleUserRegistration(string payloadJson)
+        private async Task<EventContext> BuildEventContextAsync(string eventType, string payloadJson)
         {
-            _logger.LogInformation("Handling user registration");
-
-            // 1. Gestión real de usuarios (delega a UserManagementService)
-            string? email = _userManagementService.ExtractEmailFromPayload(payloadJson);
-            
-            if (string.IsNullOrEmpty(email))
+            var context = new EventContext
             {
-                _logger.LogError("Cannot create user: email not found in payload");
-                return;
-            }
-
-            User user = await _userManagementService.GetOrCreateUserAsync(email, payloadJson);
-            _logger.LogInformation("User resolved: {UserId} ({Email})", user.UserId, user.Email);
-
-            // 2. Determinar workflow (delega a WorkflowRoutingService)
-            int selectedWorkflowId = await _workflowRoutingService.DetermineWorkflowAsync(payloadJson);
-
-            if (selectedWorkflowId == 0)
-            {
-                _logger.LogError("No routing rule matched for this user");
-                return;
-            }
-
-            // 3. Crear la Instancia (Prospect)
-            var newProspect = new Prospect
-            {
-                ProspectId = Guid.NewGuid(),
-                UserId = user.UserId,
-                WorkflowId = selectedWorkflowId,
-                Status = "STARTED",
-                CreatedAt = DateTime.UtcNow
+                EventType = eventType,
+                PayloadJson = payloadJson
             };
 
-            await _prospectRepo.AddAsync(newProspect);
-            await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("Prospect created: {ProspectId}", newProspect.ProspectId);
-
-            // 4. Inicializar ProspectData (delega a ProspectDataService)
-            await _prospectDataService.UpdateProspectDataAsync(newProspect.ProspectId, payloadJson);
-            _logger.LogInformation("Initial ProspectData created for {ProspectId}", newProspect.ProspectId);
-
-            // 5. Evaluar Reglas de INICIO
-            await EvaluateWorkflowRules("UserRegistered", payloadJson, selectedWorkflowId, newProspect.ProspectId);
-        }
-
-        /// <summary>
-        /// Maneja la sumisión de datos de un paso.
-        /// Aplica SRP: Lógica de validación y persistencia encapsulada.
-        /// </summary>
-        private async Task HandleStepDataSubmission(Prospect prospect, string payloadJson)
-        {
-            // 1. Verificar si el prospecto tiene un paso activo
-            if (prospect.CurrentStepId == null)
+            // Para eventos que NO son de registro, extraer prospect_id del payload
+            if (eventType != "UserRegistered")
             {
-                _logger.LogError("Prospect has no active step assigned");
-                throw new InvalidOperationException("El prospecto no tiene un paso activo asignado");
-            }
-
-            // 2. Validar los datos (delega a StepValidationService)
-            var validationResult = await _validator.ValidateStepAsync(prospect.CurrentStepId.Value, payloadJson);
-
-            if (!validationResult.IsValid)
-            {
-                _logger.LogWarning("Validation failed for Prospect {ProspectId}. Errors: {ErrorCount}", 
-                    prospect.ProspectId, validationResult.Errors.Count);
-                
-                foreach (var error in validationResult.Errors) 
+                try
                 {
-                    _logger.LogWarning("  - [{ErrorCode}] {FieldKey}: {Message}", 
-                        error.ErrorCode, error.FieldKey, error.Message);
-                }
+                    var jsonNode = System.Text.Json.Nodes.JsonNode.Parse(payloadJson);
+                    var prospectIdStr = jsonNode?["prospect_id"]?.ToString();
 
-                throw new InvalidOperationException($"Validación fallida: {validationResult.Message}");
+                    if (!string.IsNullOrEmpty(prospectIdStr) && Guid.TryParse(prospectIdStr, out var prospectId))
+                    {
+                        context.ProspectId = prospectId;
+
+                        // Recuperar workflow del prospecto
+                        var prospect = await _prospectRepo.GetByIdAsync(prospectId);
+                        if (prospect != null)
+                        {
+                            context.WorkflowId = prospect.WorkflowId;
+                            _logger.LogInformation(
+                                "Context recovered: Prospect {ProspectId} belongs to Workflow {WorkflowId}",
+                                prospectId, prospect.WorkflowId);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Prospect not found: {ProspectId}", prospectId);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No valid prospect_id found in payload for event: {EventType}", eventType);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error parsing payload to extract context for event: {EventType}", eventType);
+                }
             }
 
-            _logger.LogInformation("Structural validation successful");
-
-            // 3. Persistir datos (delega a ProspectDataService)
-            var updatedData = await _prospectDataService.UpdateProspectDataAsync(prospect.ProspectId, payloadJson);
-            _logger.LogInformation("ProspectData updated successfully. Total data: {DataLength} chars", 
-                updatedData.Length);
+            return context;
         }
 
         /// <summary>
-        /// Evalúa y ejecuta reglas de negocio para un workflow específico.
+        /// Evalúa y ejecuta reglas de negocio para el evento.
         /// Aplica OCP: Extensible agregando nuevas reglas en BD sin modificar código.
         /// </summary>
-        private async Task EvaluateWorkflowRules(string eventType, string payloadJson, int? workflowIdOverride = null, Guid? prospectIdOverride = null)
+        private async Task EvaluateWorkflowRules(EventContext context)
         {
-            int currentWorkflowId = workflowIdOverride ?? 0;
-            Guid currentProspectId = prospectIdOverride ?? Guid.Empty;
+            if (!context.WorkflowId.HasValue)
+            {
+                _logger.LogWarning("Cannot evaluate rules: WorkflowId is null");
+                return;
+            }
 
             // Buscar reglas que coincidan con el Workflow y el Evento
-            var rules = await _rulesRepo.FindAsync(r => r.WorkflowId == currentWorkflowId && r.TriggerEvent == eventType);
+            var rules = await _rulesRepo.FindAsync(r =>
+                r.WorkflowId == context.WorkflowId.Value &&
+                r.TriggerEvent == context.EventType);
 
             if (!rules.Any())
             {
-                _logger.LogInformation("No rules configured for {EventType} in Workflow {WorkflowId}", 
-                    eventType, currentWorkflowId);
+                _logger.LogInformation(
+                    "No rules configured for {EventType} in Workflow {WorkflowId}",
+                    context.EventType, context.WorkflowId.Value);
                 return;
             }
 
+            _logger.LogInformation(
+                "Evaluating {RuleCount} rules for event {EventType} in Workflow {WorkflowId}",
+                rules.Count(), context.EventType, context.WorkflowId.Value);
+
             foreach (var rule in rules)
             {
-                // Evaluar la condición de la regla
-                if (_ruleEngine.Evaluate(rule.ConditionExpression, payloadJson))
+                try
                 {
-                    _logger.LogInformation("Rule {RuleId} matched. Triggering action: {ActionKey}", 
-                        rule.RuleId, rule.ActionKeyOnTrue);
+                    // Evaluar la condición de la regla
+                    if (_ruleEngine.Evaluate(rule.ConditionExpression, context.PayloadJson))
+                    {
+                        _logger.LogInformation(
+                            "Rule {RuleId} matched. Triggering action: {ActionKey}",
+                            rule.RuleId, rule.ActionKeyOnTrue);
 
-                    // Ejecutar la estrategia (delega a ActionExecutor)
-                    await _actionExecutor.ExecuteActionAsync(rule.ActionKeyOnTrue, currentProspectId, payloadJson);
+                        // Ejecutar la estrategia (delega a ActionExecutor)
+                        await _actionExecutor.ExecuteActionAsync(
+                            rule.ActionKeyOnTrue,
+                            context.ProspectId ?? Guid.Empty,
+                            context.PayloadJson);
+                    }
+                    else
+                    {
+                        _logger.LogDebug(
+                            "Rule {RuleId} condition not met: {Condition}",
+                            rule.RuleId, rule.ConditionExpression);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex,
+                        "Error evaluating or executing rule {RuleId} for event {EventType}",
+                        rule.RuleId, context.EventType);
+                    
+                    // Decidir si continuar con otras reglas o fallar completamente
+                    // Por ahora, loggeamos y continuamos
                 }
             }
         }

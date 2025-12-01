@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Onboarding.Core.Interfaces;
 using Onboarding.Core.Services;
+using Onboarding.Core.Events;
+using Onboarding.Core.Events.Handlers;
 using Onboarding.Infrastructure.Data;
 using Onboarding.Infrastructure.Data.Repositories;
 using Onboarding.Infrastructure.Strategies;
@@ -9,11 +11,13 @@ using Onboarding.Infrastructure.Strategies.External;
 using Onboarding.Infrastructure.Strategies.Internal;
 using Onboarding.Infrastructure.Strategies.Rules;
 using Onboarding.Infrastructure.Events;
+using Onboarding.Infrastructure.Validation.Providers;
 using OvexDataModelingTest.Data;
 using Polly;
 using Polly.Extensions.Http;
 using System;
 using System.Net.Http;
+using Onboarding.Core.Validation;
 
 namespace Onboarding.Infrastructure.Extensions
 {
@@ -48,13 +52,21 @@ namespace Onboarding.Infrastructure.Extensions
             // En producción, reemplazar con GooglePubSubPublisher
             services.AddScoped<IEventPublisher, InMemoryEventPublisher>();
 
-            // 7. HTTP CLIENT CON POLLY (Resiliencia)
+            // 7. EVENT HANDLERS (Strategy Pattern)
+            services.AddScoped<IEventHandler, UserRegisteredHandler>();
+            services.AddScoped<IEventHandler, StepDataSubmittedHandler>();
+            // Agregar más handlers específicos aquí según sea necesario
+            
+            // Factory para resolver handlers
+            services.AddScoped<IEventHandlerFactory, EventHandlerFactory>();
+
+            // 8. HTTP CLIENT CON POLLY (Resiliencia)
             services.AddHttpClient("ExternalAPIs")
                 .AddPolicyHandler(GetRetryPolicy())
                 .AddPolicyHandler(GetCircuitBreakerPolicy())
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5)); // Recrear handler cada 5 minutos
 
-            // 8. Estrategias
+            // 9. Estrategias
             services.AddScoped<IActionExecutor, ActionExecutorService>();
             services.AddScoped<ExternalApiStrategy>(); // Simulado (legacy)
             services.AddScoped<RealExternalApiStrategy>(); // NUEVO: Real con HttpClient
@@ -63,14 +75,14 @@ namespace Onboarding.Infrastructure.Extensions
             services.AddScoped<PromoteToGoldenRecordStrategy>();
             services.AddScoped<UpdateProspectStatusStrategy>();
 
-            // 9. Registro de estrategias de operadores
+            // 10. Registro de estrategias de operadores
             services.AddSingleton<IOperatorStrategy, EqualsStrategy>();
             services.AddSingleton<IOperatorStrategy, NotEqualsStrategy>();
             services.AddSingleton<IOperatorStrategy, GreaterThanStrategy>();
             services.AddSingleton<IOperatorStrategy, GreaterOrEqualStrategy>();
             services.AddSingleton<IOperatorStrategy, ContainsStrategy>();
 
-            // 10. VALIDADORES DE CAMPOS (Strategy Pattern)
+            // 11. VALIDADORES DE CAMPOS (Strategy Pattern)
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RequiredValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RangeValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.LengthValidator>();
@@ -78,15 +90,29 @@ namespace Onboarding.Infrastructure.Extensions
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.AllowedValuesValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RfcValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.CurpValidator>();
-            services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.EmailValidator>();
+            services.AddSingleton<IFieldValidator, Onboarding.Core. Validators.EmailValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.PhoneValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.PostalCodeValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.UrlValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.DateValidator>();
             services.AddSingleton<IFieldValidator, Onboarding.Core.Validators.RegexValidator>();
+            services.AddScoped<IFieldValidator, Onboarding.Core.Validators.ObjectArrayValidator>(); // NUEVO: Validador para arrays de objetos
 
             // Validation pipeline
             services.AddScoped<IValidationPipeline, ValidationPipeline>();
+
+            // 12. SISTEMA DE VALIDACIONES CONFIGURABLES
+            services.AddScoped<Onboarding.Core.Validation.IValidationOrchestrator, 
+                Onboarding.Core.Validation.ValidationOrchestrator>();
+            services.AddScoped<Onboarding.Core.Validation.IValidationProviderFactory, 
+                Onboarding.Core.Validation.ValidationProviderFactory>();
+
+            // Validation Providers
+            services.AddScoped<IValidationProvider, DuplicateEmailValidator>();
+            services.AddScoped<IValidationProvider, RuleEngineValidationProvider>();
+            services.AddScoped<IValidationProvider, ExternalApiValidationProvider>();
+            services.AddScoped<IValidationProvider, DatabaseQueryValidationProvider>();
+
 
             return services;
         }

@@ -1,0 +1,162 @@
+@page
+@model Onboarding.TestClient.Pages.Start.OvexClientModel
+@{
+    ViewData["Title"] = "OVEX - Cliente Individual";
+}
+
+<div class="ovex-client-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <!-- Header -->
+                <div class="onboarding-header text-center mb-5">
+                    <div class="brand-logo mb-4">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <h1 class="brand-title">OVEX</h1>
+                    <h2 class="process-title">Arrendamiento Personal</h2>
+                    <p class="process-description">
+                        Comencemos con tu información básica
+                    </p>
+                </div>
+
+                <!-- Form Card -->
+                <div class="form-card">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @Model.ErrorMessage
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope me-2"></i>
+                                Correo Electrónico
+                            </label>
+                            <input 
+                                type="email" 
+                                class="form-control form-control-lg" 
+                                id="email" 
+                                name="email"
+                                asp-for="Email"
+                                placeholder="tu@email.com"
+                                required>
+                            <div class="form-text">
+                                Usaremos este correo para comunicarnos contigo durante el proceso
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Iniciar Proceso
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                            <a asp-page="/Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Volver
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Info Footer -->
+                <div class="info-footer text-center mt-4">
+                    <p class="text-muted">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Tus datos están protegidos y encriptados
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ovex-client-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        padding: 60px 20px;
+    }
+
+    .brand-logo {
+        font-size: 5rem;
+        color: white;
+        text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .brand-title {
+        color: white;
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .process-title {
+        color: rgba(255,255,255,0.95);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .process-description {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        padding: 15px;
+    }
+
+    .form-control:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 0 0.25rem rgba(79, 172, 254, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        color: #5a6c7d;
+        font-weight: 600;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #d0d0d0;
+    }
+
+    .info-footer p {
+        font-size: 0.95rem;
+    }
+</style>

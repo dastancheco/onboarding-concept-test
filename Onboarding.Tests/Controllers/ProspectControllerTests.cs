@@ -2,7 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Onboarding.Api.Controllers;
 using Onboarding.Core.Domain;
 using Onboarding.Core.Interfaces;
+using Onboarding.Core.Validation; // NUEVO: Para IValidationOrchestrator
 using OvexDataModelingTest.Entities.App;
+using OvexDataModelingTest.Entities.Config;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace Onboarding.Tests.Controllers
 {
@@ -16,6 +20,7 @@ namespace Onboarding.Tests.Controllers
     /// - Consulta de transiciones disponibles
     /// - Actualización manual de estados
     /// - Manejo de errores (prospecto no encontrado, transiciones inválidas)
+    /// - Validación de EmailDuplicado
     /// </summary>
     public class ProspectControllerTests
     {
@@ -32,11 +37,27 @@ namespace Onboarding.Tests.Controllers
             _prospectStatusServiceMock = new Mock<IProspectStatusService>();
             _prospectRepoMock = new Mock<IRepository<Prospect>>();
             _loggerMock = new Mock<ILogger<ProspectController>>();
+            
+            // Mocks adicionales para el endpoint POST
+            var phaseRepoMock = new Mock<IRepository<Phase>>();
+            var stepRepoMock = new Mock<IRepository<Step>>();
+            var workflowRoutingServiceMock = new Mock<IWorkflowRoutingService>();
+            var userManagementServiceMock = new Mock<IUserManagementService>();
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var eventPublisherMock = new Mock<IEventPublisher>();
+            var validationOrchestratorMock = new Mock<IValidationOrchestrator>(); // NUEVO
 
             _sut = new ProspectController(
                 _prospectDataServiceMock.Object,
                 _prospectStatusServiceMock.Object,
                 _prospectRepoMock.Object,
+                phaseRepoMock.Object,
+                stepRepoMock.Object,
+                workflowRoutingServiceMock.Object,
+                userManagementServiceMock.Object,
+                unitOfWorkMock.Object,
+                eventPublisherMock.Object,
+                validationOrchestratorMock.Object, // NUEVO
                 _loggerMock.Object);
         }
 
@@ -502,6 +523,11 @@ namespace Onboarding.Tests.Controllers
                 Times.Once,
                 "Debe usar 'API_USER' como valor por defecto cuando ChangedBy es null");
         }
+
+        #endregion
+        #region Email Duplication Tests
+
+       
 
         #endregion
     }

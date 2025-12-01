@@ -31,7 +31,26 @@ namespace Onboarding.Core.Services
         {
             var errors = new List<ValidationError>();
 
-            // 1. VALIDACIÓN: REQUIRED (si está configurado)
+            // NUEVO: Manejo especial para OBJECT_ARRAY
+            if (dataType.ToUpperInvariant() == "OBJECT_ARRAY")
+            {
+                if (_validators.TryGetValue("OBJECT_ARRAY", out var arrayValidator))
+                {
+                    // Usar reflexión para llamar al método ValidateWithSchema
+                    var validateMethod = arrayValidator.GetType().GetMethod("ValidateWithSchema");
+                    if (validateMethod != null)
+                    {
+                        var result = validateMethod.Invoke(arrayValidator, new object?[] { fieldKey, value, config });
+                        if (result is IEnumerable<ValidationError> arrayErrors)
+                        {
+                            errors.AddRange(arrayErrors);
+                        }
+                    }
+                }
+                return errors;
+            }
+
+            // 1. VALIDACI?N: REQUIRED (si est? configurado)
             if (GetBooleanValue(config, "is_required", false))
             {
                 var requiredError = ValidateWithValidator("REQUIRED", fieldKey, value, null);
@@ -42,11 +61,11 @@ namespace Onboarding.Core.Services
                 }
             }
 
-            // Si el valor está vacío y no es requerido, saltar validaciones
+            // Si el valor est? vac?o y no es requerido, saltar validaciones
             if (string.IsNullOrWhiteSpace(value))
                 return errors;
 
-            // 2. VALIDACIÓN: DATA_TYPE
+            // 2. VALIDACI?N: DATA_TYPE
             var dataTypeError = ValidateWithValidator("DATA_TYPE", fieldKey, value, dataType);
             if (dataTypeError != null)
             {
@@ -54,7 +73,7 @@ namespace Onboarding.Core.Services
                 return errors; // Si el tipo es incorrecto, no seguir
             }
 
-            // 3. VALIDACIÓN: RANGE (para números)
+            // 3. VALIDACI?N: RANGE (para n?meros)
             if (dataType.ToUpperInvariant() is "NUMBER" or "DECIMAL" or "INTEGER")
             {
                 if (config.ContainsKey("min") || config.ContainsKey("max"))
@@ -65,7 +84,7 @@ namespace Onboarding.Core.Services
                 }
             }
 
-            // 4. VALIDACIÓN: LENGTH (para texto)
+            // 4. VALIDACI?N: LENGTH (para texto)
             if (dataType.ToUpperInvariant() is "TEXT" or "STRING")
             {
                 if (config.ContainsKey("min_length") || config.ContainsKey("max_length"))
@@ -76,7 +95,7 @@ namespace Onboarding.Core.Services
                 }
             }
 
-            // 5. VALIDACIÓN: ALLOWED_VALUES (enum)
+            // 5. VALIDACI?N: ALLOWED_VALUES (enum)
             if (config.TryGetValue("allowed_values", out var allowedObj))
             {
                 var allowedValues = ExtractAllowedValues(allowedObj);
@@ -88,13 +107,13 @@ namespace Onboarding.Core.Services
                 }
             }
 
-            // 6. VALIDACIÓN: VALIDADOR ESPECÍFICO (RFC, CURP, EMAIL, etc.)
+            // 6. VALIDACI?N: VALIDADOR ESPEC?FICO (RFC, CURP, EMAIL, etc.)
             if (config.TryGetValue("validator", out var validatorObj))
             {
                 var validatorType = ExtractString(validatorObj);
                 if (!string.IsNullOrEmpty(validatorType))
                 {
-                    // Para REGEX, pasar el patrón
+                    // Para REGEX, pasar el patr?n
                     object? validatorConfig = null;
                     if (validatorType.ToUpperInvariant() == "REGEX" && config.TryGetValue("pattern", out var patternObj))
                     {

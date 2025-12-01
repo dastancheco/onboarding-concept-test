@@ -21,7 +21,6 @@ namespace OvexDataModelingTest.Entities.Config
         [Required, MaxLength(100)]
         public string Name { get; set; }
 
-        public int? ProductId { get; set; } // Nullable
         public bool IsActive { get; set; } = true;
 
         // Relaciones
