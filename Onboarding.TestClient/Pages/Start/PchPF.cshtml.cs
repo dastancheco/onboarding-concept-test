@@ -18,7 +18,31 @@ namespace Onboarding.TestClient.Pages.Start
         }
 
         [BindProperty]
+        public string Nombres { get; set; } = string.Empty;
+
+        [BindProperty]
+        public string PrimerApellido { get; set; } = string.Empty;
+
+        [BindProperty]
+        public string SegundoApellido { get; set; } = string.Empty;
+
+        [BindProperty]
         public string Email { get; set; } = string.Empty;
+
+        [BindProperty]
+        public string Telefono { get; set; } = string.Empty;
+
+        [BindProperty]
+        public string RFC { get; set; } = string.Empty;
+
+        [BindProperty]
+        public string Nacionalidad { get; set; } = string.Empty;
+
+        [BindProperty]
+        public bool EULA { get; set; } = false;
+
+        [BindProperty]
+        public char Gender { get; set; }
 
         public string? ErrorMessage { get; set; }
 
@@ -31,7 +55,7 @@ namespace Onboarding.TestClient.Pages.Start
         {
             if (string.IsNullOrWhiteSpace(Email))
             {
-                ErrorMessage = "El correo electrónico es requerido";
+                ErrorMessage = "Los nombres son requeridos";
                 return Page();
             }
 
@@ -44,7 +68,7 @@ namespace Onboarding.TestClient.Pages.Start
                 {
                     Email = Email,
                     AppId = "PCH",
-                    ClientType = "PM",
+                    ClientType = "PF",
                     Country = "MX"
                 };
 
