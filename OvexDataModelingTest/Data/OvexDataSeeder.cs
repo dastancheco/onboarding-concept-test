@@ -901,11 +901,11 @@ namespace OvexDataModelingTest.Data
             // ==========================================
 
             // Fase 2.1: Datos de Empresa
-            var phase2_1 = new Phase { PhaseId = 3, WorkflowId = 2, Name = "Información Empresarial", Order = 1 };
+            var phase2_1 = new Phase { PhaseId = 6, WorkflowId = 2, Name = "Información Empresarial", Order = 1 };
             db.Phases.Add(phase2_1);
 
-            var step2_1_1 = new Step { StepId = 4, PhaseId = 3, Name = "Datos Fiscales", Order = 1 };
-            var step2_1_2 = new Step { StepId = 5, PhaseId = 3, Name = "Datos de Representante", Order = 2 };
+            var step2_1_1 = new Step { StepId = 6, PhaseId = 3, Name = "Datos Fiscales", Order = 1 };
+            var step2_1_2 = new Step { StepId = 7, PhaseId = 3, Name = "Datos de Representante", Order = 2 };
             db.Steps.AddRange(step2_1_1, step2_1_2);
 
             // Step 4: Datos Fiscales (RFC, CIEC, razón social)
@@ -923,10 +923,10 @@ namespace OvexDataModelingTest.Data
             );
 
             // Fase 2.2: Solicitud
-            var phase2_2 = new Phase { PhaseId = 4, WorkflowId = 2, Name = "Detalles de Solicitud", Order = 2 };
+            var phase2_2 = new Phase { PhaseId = 7, WorkflowId = 2, Name = "Detalles de Solicitud", Order = 2 };
             db.Phases.Add(phase2_2);
 
-            var step2_2_1 = new Step { StepId = 6, PhaseId = 4, Name = "Información de Flotilla", Order = 1 };
+            var step2_2_1 = new Step { StepId = 8, PhaseId = 4, Name = "Información de Flotilla", Order = 1 };
             db.Steps.Add(step2_2_1);
 
             db.StepFields.AddRange(
@@ -935,10 +935,10 @@ namespace OvexDataModelingTest.Data
             );
 
             // NUEVO: Fase 2.3: Accionistas
-            var phase2_3 = new Phase { PhaseId = 7, WorkflowId = 2, Name = "Estructura Accionaria", Order = 3 };
+            var phase2_3 = new Phase { PhaseId = 8, WorkflowId = 2, Name = "Estructura Accionaria", Order = 3 };
             db.Phases.Add(phase2_3);
 
-            var step2_3_1 = new Step { StepId = 10, PhaseId = 7, Name = "Accionistas", Order = 1 };
+            var step2_3_1 = new Step { StepId = 9, PhaseId = 7, Name = "Accionistas", Order = 1 };
             db.Steps.Add(step2_3_1);
 
             db.StepFields.Add(
@@ -959,11 +959,11 @@ namespace OvexDataModelingTest.Data
             // ==========================================
 
             // Fase 3.1: Información Corporativa
-            var phase3_1 = new Phase { PhaseId = 5, WorkflowId = 3, Name = "Información Corporativa", Order = 1 };
+            var phase3_1 = new Phase { PhaseId = 9, WorkflowId = 3, Name = "Información Corporativa", Order = 1 };
             db.Phases.Add(phase3_1);
 
-            var step3_1_1 = new Step { StepId = 7, PhaseId = 5, Name = "Datos Fiscales de la Empresa", Order = 1 };
-            var step3_1_2 = new Step { StepId = 8, PhaseId = 5, Name = "Representante Legal", Order = 2 };
+            var step3_1_1 = new Step { StepId = 10, PhaseId = 5, Name = "Datos Fiscales de la Empresa", Order = 1 };
+            var step3_1_2 = new Step { StepId = 11, PhaseId = 5, Name = "Representante Legal", Order = 2 };
             db.Steps.AddRange(step3_1_1, step3_1_2);
 
             // Step 7: Datos Fiscales
@@ -982,10 +982,10 @@ namespace OvexDataModelingTest.Data
             );
 
             // Fase 3.2: Solicitud de Financiamiento
-            var phase3_2 = new Phase { PhaseId = 6, WorkflowId = 3, Name = "Solicitud de Financiamiento", Order = 2 };
+            var phase3_2 = new Phase { PhaseId = 10, WorkflowId = 3, Name = "Solicitud de Financiamiento", Order = 2 };
             db.Phases.Add(phase3_2);
 
-            var step3_2_1 = new Step { StepId = 9, PhaseId = 6, Name = "Monto y Propósito", Order = 1 };
+            var step3_2_1 = new Step { StepId = 12, PhaseId = 6, Name = "Monto y Propósito", Order = 1 };
             db.Steps.Add(step3_2_1);
 
             db.StepFields.AddRange(
