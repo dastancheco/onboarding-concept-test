@@ -61,7 +61,7 @@ namespace Onboarding.TestClient.Pages.Start
 
             try
             {
-                _logger.LogInformation("Creating PCH PM prospect for email: {Email}", Email);
+                _logger.LogInformation("Creating PCH PF prospect for email: {Email}", Email);
 
                 // Crear el prospecto mediante comando REST (sincrónico)
                 var request = new CreateProspectRequest

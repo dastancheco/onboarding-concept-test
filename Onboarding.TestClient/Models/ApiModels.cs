@@ -242,23 +242,23 @@ public class FieldConfiguration
     public bool IsRequired => GetConfigValue("is_required") == "true" || GetConfigValue("required") == "true";
     public string? Placeholder => GetConfigValue("placeholder");
     public string? HelpText => GetConfigValue("help_text");
-    
+
     // Validaciones de longitud (strings)
     public int? MinLength => int.TryParse(GetConfigValue("min_length"), out var val) ? val : null;
     public int? MaxLength => int.TryParse(GetConfigValue("max_length"), out var val) ? val : null;
-    
+
     // Validaciones de rango (números)
     public int? MinValue => int.TryParse(GetConfigValue("min"), out var val) ? val : null;
     public int? MaxValue => int.TryParse(GetConfigValue("max"), out var val) ? val : null;
-    
+
     // Validaciones de fecha
     public DateTime? MinDate => DateTime.TryParse(GetConfigValue("min_date"), out var val) ? val : (DateTime?)null;
     public DateTime? MaxDate => DateTime.TryParse(GetConfigValue("max_date"), out var val) ? val : (DateTime?)null;
-    
+
     // Validaciones de patrón
     public string? Pattern => GetConfigValue("pattern");
     public string? Validator => GetConfigValue("validator"); // ej: "EMAIL", "PHONE", "RFC"
-    
+
     // Otras configuraciones
     public List<string>? AllowedValues => GetConfigArrayValue("allowed_values");
 
@@ -357,7 +357,7 @@ public class FieldConfiguration
                 }
                 return null;
             }
-            
+
             // Para otros tipos (int, decimal, bool, etc.)
             return (T)Convert.ChangeType(value, typeof(T));
         }

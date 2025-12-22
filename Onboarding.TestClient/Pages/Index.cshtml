@@ -1,283 +1,292 @@
 ﻿@page
 @model IndexModel
 @{
-	ViewData["Title"] = "Selecciona tu Proceso de Onboarding";
+    ViewData["Title"] = "Selecciona tu Proceso de Onboarding";
 }
 
 <div class="landing-page">
-	<div class="container">
-		<div class="hero-section text-center mb-5">
-			<h1 class="display-3 fw-bold mb-3">Sistema de Onboarding</h1>
-			<p class="lead text-muted">Selecciona el proceso que deseas iniciar</p>
-		</div>
-
-		<div class="row g-4 justify-content-center">
-			<!-- Opción 1: OVEX - Cliente Individual -->
-			<div class="col-lg-3 col-md-6">
-				<div class="onboarding-card ovex-client">
-					<div class="card-icon">
-						<i class="bi bi-person-circle"></i>
-					</div>
-					<h3 class="card-title">OVEX</h3>
-					<h5 class="card-subtitle">Cliente Individual</h5>
-					<p class="card-description">
-						Proceso de arrendamiento para clientes personales.
-						Rápido, simple y seguro.
-					</p>
-					<ul class="features-list">
-						<li><i class="bi bi-check-circle-fill"></i> Registro simplificado</li>
-						<li><i class="bi bi-check-circle-fill"></i> Aprobación rápida</li>
-						<li><i class="bi bi-check-circle-fill"></i> 100% digital</li>
-					</ul>
-					<a asp-page="/Start/OvexClient" class="btn btn-start">
-						Comenzar
-						<i class="bi bi-arrow-right ms-2"></i>
-					</a>
-				</div>
-			</div>
-
-			<!-- Opción 2: OVEX - Flotilla Empresarial -->
-			<div class="col-lg-3 col-md-6">
-				<div class="onboarding-card ovex-fleet">
-					<div class="card-icon">
-						<i class="bi bi-building"></i>
-					</div>
-					<h3 class="card-title">OVEX</h3>
-					<h5 class="card-subtitle">Flotilla Empresarial</h5>
-					<p class="card-description">
-						Soluciones de arrendamiento para empresas con flotillas vehiculares.
-					</p>
-					<ul class="features-list">
-						<li><i class="bi bi-check-circle-fill"></i> Múltiples vehículos</li>
-						<li><i class="bi bi-check-circle-fill"></i> Validación fiscal</li>
-						<li><i class="bi bi-check-circle-fill"></i> Análisis crediticio</li>
-					</ul>
-					<a asp-page="/Start/OvexFleet" class="btn btn-start">
-						Comenzar
-						<i class="bi bi-arrow-right ms-2"></i>
-					</a>
-				</div>
-			</div>
-
-			<!-- Opción 3: PCH - Persona Moral -->
-			<div class="col-lg-3 col-md-6">
-				<div class="onboarding-card pch-pm">
-					<div class="card-icon">
-						<i class="bi bi-briefcase"></i>
-					</div>
-					<h3 class="card-title">PCH Capital</h3>
-					<h5 class="card-subtitle">Persona Moral</h5>
-					<p class="card-description">
-						Financiamiento corporativo para personas morales.
-						Soluciones empresariales a medida.
-					</p>
-					<ul class="features-list">
-						<li><i class="bi bi-check-circle-fill"></i> Análisis empresarial</li>
-						<li><i class="bi bi-check-circle-fill"></i> Due diligence</li>
-						<li><i class="bi bi-check-circle-fill"></i> Líneas de crédito</li>
-					</ul>
-					<a asp-page="/Start/PchPM" class="btn btn-start">
-						Comenzar
-						<i class="bi bi-arrow-right ms-2"></i>
-					</a>
-				</div>
-			</div>
-
-			<!-- Opción 3: PCH - Persona Fisica -->
-			<div class="col-lg-3 col-md-6">
-				<div class="onboarding-card pch-pm">
-					<div class="card-icon">
-						<i class="bi bi-briefcase"></i>
-					</div>
-					<h3 class="card-title">PCH Capital</h3>
-					<h5 class="card-subtitle">Persona Fisica</h5>
-					<p class="card-description">
-						Financiamiento corporativo para personas morales.
-						Soluciones empresariales a medida.
-					</p>
-					<ul class="features-list">
-						<li><i class="bi bi-check-circle-fill"></i> Análisis empresarial</li>
-						<li><i class="bi bi-check-circle-fill"></i> Due diligence</li>
-						<li><i class="bi bi-check-circle-fill"></i> Líneas de crédito</li>
-					</ul>
-					<a asp-page="/Start/PchPF" class="btn btn-start">
-						Comenzar
-						<i class="bi bi-arrow-right ms-2"></i>
-					</a>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="container">
+        <div class="hero-section text-center mb-5">
+            <h1 class="display-3 fw-bold mb-3">Sistema de Onboarding</h1>
+            <p class="lead text-muted">Selecciona el proceso que deseas iniciar</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <!-- Opción 1: OVEX - Cliente Individual -->
+            <div class="col-lg-3 col-md-6">
+                <div class="onboarding-card ovex-client">
+                    <div class="card-icon">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <h3 class="card-title">OVEX</h3>
+                    <h5 class="card-subtitle">Cliente Individual</h5>
+                    <p class="card-description">
+                        Proceso de arrendamiento para clientes personales.
+                        Rápido, simple y seguro.
+                    </p>
+                    <ul class="features-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Registro simplificado</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Aprobación rápida</li>
+                        <li><i class="bi bi-check-circle-fill"></i> 100% digital</li>
+                    </ul>
+                    <a asp-page="/Start/OvexClient" class="btn btn-start">
+                        Comenzar
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- Opción 2: OVEX - Flotilla Empresarial -->
+            <div class="col-lg-3 col-md-6">
+                <div class="onboarding-card ovex-fleet">
+                    <div class="card-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h3 class="card-title">OVEX</h3>
+                    <h5 class="card-subtitle">Flotilla Empresarial</h5>
+                    <p class="card-description">
+                        Soluciones de arrendamiento para empresas con flotillas vehiculares.
+                    </p>
+                    <ul class="features-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Múltiples vehículos</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Validación fiscal</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Análisis crediticio</li>
+                    </ul>
+                    <a asp-page="/Start/OvexFleet" class="btn btn-start">
+                        Comenzar
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- Opción 3: PCH - Persona Moral -->
+            <div class="col-lg-3 col-md-6">
+                <div class="onboarding-card pch-pm">
+                    <div class="card-icon">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <h3 class="card-title">PCH Capital</h3>
+                    <h5 class="card-subtitle">Persona Moral</h5>
+                    <p class="card-description">
+                        Financiamiento corporativo para personas morales.
+                        Soluciones empresariales a medida.
+                    </p>
+                    <ul class="features-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Análisis empresarial</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Due diligence</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Líneas de crédito</li>
+                    </ul>
+                    <a asp-page="/Start/PchPM" class="btn btn-start">
+                        Comenzar
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- Opción 3: PCH - Persona Fisica -->
+            <div class="col-lg-3 col-md-6">
+                <div class="onboarding-card pch-pf">
+                    <div class="card-icon">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <h3 class="card-title">PCH Capital</h3>
+                    <h5 class="card-subtitle">Persona Física</h5>
+                    <p class="card-description">
+                        Financiamiento personal para personas físicas.
+                        Soluciones indivuales a medida.
+                    </p>
+                    <ul class="features-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Análisis personal</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Due diligence</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Líneas de crédito</li>
+                    </ul>
+                    <a asp-page="/Start/PchPF" class="btn btn-start">
+                        Comenzar
+                        <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-	.landing-page {
-		min-height: 100vh;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		padding: 60px 0;
-	}
+    .landing-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 60px 0;
+    }
 
-	.hero-section h1 {
-		color: white;
-		text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-	}
+    .hero-section h1 {
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
 
-	.hero-section p {
-		color: rgba(255,255,255,0.9);
-		font-size: 1.2rem;
-	}
+    .hero-section p {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.2rem;
+    }
 
-	.onboarding-card {
-		background: white;
-		border-radius: 20px;
-		padding: 40px 30px;
-		box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-		transition: all 0.3s ease;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		position: relative;
-		overflow: hidden;
-	}
+    .onboarding-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
 
-		.onboarding-card::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			height: 5px;
-			background: linear-gradient(90deg, var(--card-color-1), var(--card-color-2));
-		}
+        .onboarding-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--card-color-1), var(--card-color-2));
+        }
 
-		.onboarding-card:hover {
-			transform: translateY(-10px);
-			box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-		}
+        .onboarding-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
 
-	/* OVEX Client - Azul/Verde */
-	.ovex-client {
-		--card-color-1: #4facfe;
-		--card-color-2: #00f2fe;
-	}
+    /* OVEX Client - Azul/Verde */
+    .ovex-client {
+        --card-color-1: #4facfe;
+        --card-color-2: #00f2fe;
+    }
 
-		.ovex-client .card-icon {
-			color: #4facfe;
-		}
+        .ovex-client .card-icon {
+            color: #4facfe;
+        }
 
-		.ovex-client .btn-start {
-			background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-		}
+        .ovex-client .btn-start {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
 
-	/* OVEX Fleet - Naranja/Rojo */
-	.ovex-fleet {
-		--card-color-1: #fa709a;
-		--card-color-2: #fee140;
-	}
+    /* OVEX Fleet - Naranja/Rojo */
+    .ovex-fleet {
+        --card-color-1: #fa709a;
+        --card-color-2: #fee140;
+    }
 
-		.ovex-fleet .card-icon {
-			color: #fa709a;
-		}
+        .ovex-fleet .card-icon {
+            color: #fa709a;
+        }
 
-		.ovex-fleet .btn-start {
-			background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-		}
+        .ovex-fleet .btn-start {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
 
-	/* PCH PM - Púrpura/Azul Oscuro */
-	.pch-pm {
-		--card-color-1: #667eea;
-		--card-color-2: #764ba2;
-	}
+    /* PCH PM - Púrpura/Azul Oscuro */
+    .pch-pm {
+        --card-color-1: #667eea;
+        --card-color-2: #764ba2;
+    }
 
-		.pch-pm .card-icon {
-			color: #667eea;
-		}
+        .pch-pm .card-icon {
+            color: #667eea;
+        }
 
-		.pch-pm .btn-start {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		}
+        .pch-pm .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
 
-	.card-icon {
-		font-size: 4rem;
-		margin-bottom: 20px;
-	}
+    .pch-pf {
+        --card-color-1: #45CF34;
+        --card-color-2: #36A89D;
+    }
 
-	.card-title {
-		font-size: 1.8rem;
-		font-weight: 700;
-		margin-bottom: 5px;
-		color: #2c3e50;
-	}
+        .pch-pf .card-icon {
+            color: #45CF34;
+        }
 
-	.card-subtitle {
-		font-size: 1.1rem;
-		color: #7f8c8d;
-		margin-bottom: 20px;
-		font-weight: 500;
-	}
+        .pch-pf .btn-start {
+            background: linear-gradient(135deg, #45CF34 0%, #36A89D 100%);
+        }
 
-	.card-description {
-		color: #5a6c7d;
-		margin-bottom: 25px;
-		line-height: 1.6;
-		flex-grow: 1;
-	}
+    .card-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
 
-	.features-list {
-		list-style: none;
-		padding: 0;
-		margin-bottom: 30px;
-	}
+    .card-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
 
-		.features-list li {
-			padding: 8px 0;
-			color: #5a6c7d;
-			font-size: 0.95rem;
-		}
+    .card-subtitle {
+        font-size: 1.1rem;
+        color: #7f8c8d;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
 
-		.features-list i {
-			color: #27ae60;
-			margin-right: 10px;
-		}
+    .card-description {
+        color: #5a6c7d;
+        margin-bottom: 25px;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
 
-	.btn-start {
-		color: white;
-		border: none;
-		padding: 15px 40px;
-		border-radius: 50px;
-		font-weight: 600;
-		font-size: 1rem;
-		text-decoration: none;
-		display: inline-block;
-		transition: all 0.3s ease;
-		box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-	}
+    .features-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 30px;
+    }
 
-		.btn-start:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-			color: white;
-		}
+        .features-list li {
+            padding: 8px 0;
+            color: #5a6c7d;
+            font-size: 0.95rem;
+        }
 
-		.btn-start i {
-			transition: transform 0.3s ease;
-		}
+        .features-list i {
+            color: #27ae60;
+            margin-right: 10px;
+        }
 
-		.btn-start:hover i {
-			transform: translateX(5px);
-		}
+    .btn-start {
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
 
-	@@media (max-width: 768px) {
-		.landing-page {
-			padding: 40px 0;
-		}
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            color: white;
+        }
 
-		.hero-section h1 {
-			font-size: 2.5rem;
-		}
+        .btn-start i {
+            transition: transform 0.3s ease;
+        }
 
-		.onboarding-card {
-			margin-bottom: 30px;
-		}
-	}
+        .btn-start:hover i {
+            transform: translateX(5px);
+        }
+
+    @@media (max-width: 768px) {
+        .landing-page {
+            padding: 40px 0;
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+        }
+
+        .onboarding-card {
+            margin-bottom: 30px;
+        }
+    }
 </style>

@@ -2,11 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Onboarding.TestClient.Models;
 using Onboarding.TestClient.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Onboarding.TestClient.Pages.Start
 {

@@ -1,8 +1,5 @@
 ﻿using OvexDataModelingTest.Entities.App;
 using OvexDataModelingTest.Entities.Config;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 
 namespace OvexDataModelingTest.Data
@@ -18,32 +15,32 @@ namespace OvexDataModelingTest.Data
             // ==========================================
             // 1. WORKFLOWS
             // ==========================================
-            //var wfOvexClient = new Workflow
-            //{
-            //    WorkflowId = 1,
-            //    WorkflowType = "PROSPECT",
-            //    SubTypeKey = "OVEX_CLIENT",
-            //    Name = "OVEX - Cliente Individual",
-            //    IsActive = true
-            //};
+            var wfOvexClient = new Workflow
+            {
+                WorkflowId = 1,
+                WorkflowType = "PROSPECT",
+                SubTypeKey = "OVEX_CLIENT",
+                Name = "OVEX - Cliente Individual",
+                IsActive = true
+            };
 
-            //var wfOvexFleet = new Workflow
-            //{
-            //    WorkflowId = 2,
-            //    WorkflowType = "PROSPECT",
-            //    SubTypeKey = "OVEX_FLOTILLA",
-            //    Name = "OVEX - Flotilla Empresarial",
-            //    IsActive = true
-            //};
+            var wfOvexFleet = new Workflow
+            {
+                WorkflowId = 2,
+                WorkflowType = "PROSPECT",
+                SubTypeKey = "OVEX_FLOTILLA",
+                Name = "OVEX - Flotilla Empresarial",
+                IsActive = true
+            };
 
-            //var wfPchPM = new Workflow
-            //{
-            //    WorkflowId = 3,
-            //    WorkflowType = "PROSPECT",
-            //    SubTypeKey = "PCH_PM",
-            //    Name = "PCH Capital - Persona Moral",
-            //    IsActive = true
-            //};
+            var wfPchPM = new Workflow
+            {
+                WorkflowId = 3,
+                WorkflowType = "PROSPECT",
+                SubTypeKey = "PCH_PM",
+                Name = "PCH Capital - Persona Moral",
+                IsActive = true
+            };
 
             var wfPchPF = new Workflow
             {
@@ -54,43 +51,40 @@ namespace OvexDataModelingTest.Data
                 IsActive = true
             };
 
-
-
-            db.Workflows.AddRange(/*wfOvexClient, wfOvexFleet, wfPchPM,*/ wfPchPF);
+            db.Workflows.AddRange(wfOvexClient, wfOvexFleet, wfPchPM, wfPchPF);
 
             // ==========================================
             // 2. RUTEO INICIAL (RoutingRules)
             // ==========================================
-            db.WorkflowRoutingRules.AddRange(
-                //new WorkflowRoutingRule
-                //{
-                //    RoutingRuleId = 1,
-                //    Priority = 1,
-                //    ConditionExpression = "app_id == \"OVEX\" && client_type == \"CLIENT\"",
-                //    TargetWorkflowId = 1
-                //},
-                //new WorkflowRoutingRule
-                //{
-                //    RoutingRuleId = 2,
-                //    Priority = 2,
-                //    ConditionExpression = "app_id == \"OVEX\" && client_type == \"FLOTILLA_EMP\"",
-                //    TargetWorkflowId = 2
-                //},
-                //new WorkflowRoutingRule
-                //{
-                //    RoutingRuleId = 3,
-                //    Priority = 3,
-                //    ConditionExpression = "app_id == \"PCH\" && client_type == \"PM\"",
-                //    TargetWorkflowId = 3
-                //},
-                new WorkflowRoutingRule
-                {
-                    RoutingRuleId = 4,
-                    Priority = 4,
-                    ConditionExpression = "app_id == \"PCH\" && client_type == \"PF\"",
-                    TargetWorkflowId = 4
-                }
-            );
+            var wfwrOvecClient = new WorkflowRoutingRule
+            {
+                RoutingRuleId = 1,
+                Priority = 1,
+                ConditionExpression = "app_id == \"OVEX\" && client_type == \"CLIENT\"",
+                TargetWorkflowId = 1
+            };
+            var wfwrOvexFleet = new WorkflowRoutingRule
+            {
+                RoutingRuleId = 2,
+                Priority = 2,
+                ConditionExpression = "app_id == \"OVEX\" && client_type == \"FLOTILLA_EMP\"",
+                TargetWorkflowId = 2
+            };
+            var wfwrPchPM = new WorkflowRoutingRule
+            {
+                RoutingRuleId = 3,
+                Priority = 3,
+                ConditionExpression = "app_id == \"PCH\" && client_type == \"PM\"",
+                TargetWorkflowId = 3
+            };
+            var wfwrPchPf = new WorkflowRoutingRule
+            {
+                RoutingRuleId = 4,
+                Priority = 4,
+                ConditionExpression = "app_id == \"PCH\" && client_type == \"PF\"",
+                TargetWorkflowId = 4
+            };
+            db.WorkflowRoutingRules.AddRange(wfwrOvecClient, wfwrOvexFleet, wfwrPchPM, wfwrPchPf);
 
             // ==========================================
             // 3. CATALOGO DE CAMPOS (FieldDefinitions)
@@ -362,33 +356,34 @@ namespace OvexDataModelingTest.Data
             //};
             //#endregion
 
-
             #region REUNION EQUIPO MARAVILLA ESCUADRON LOBO
 
-            //STEPID 1 GENERAL INFORMATION
+            // "app_id == \"PCH\" && client_type == \"PF\""
+
+            // STEPID 1 - GENERAL INFORMATION
+
             var fNames = new FieldDefinition
             {
                 FieldId = 1,
                 FieldKey = "names",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
                     min_length = 1,
                     max_length = 70,
                     label = "Nombre(s)",
-                    placeholder = "Ingresa tus nombre(s)",
-                    help_text = "Nombres como aparecen en tu documento de identificaciones"
+                    placeholder = "Ingresa tu(s) nombre(s)",
+                    help_text = "Nombres como aparecen en tu documento de identificación"
                 })
             };
-
             var fPsurname = new FieldDefinition
             {
                 FieldId = 2,
-                FieldKey = "Psurname",
+                FieldKey = "pSurname",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -396,16 +391,15 @@ namespace OvexDataModelingTest.Data
                     max_length = 70,
                     label = "Primer apellido",
                     placeholder = "Ingresa tu apellido paterno",
-                    help_text = "Apellido paterno como aparece en tu documento de identificacion"
+                    help_text = "Apellido paterno como aparece en tu documento de identificación"
                 })
             };
-
             var fMsurname = new FieldDefinition
             {
                 FieldId = 3,
-                FieldKey = "Msurname",
+                FieldKey = "mSurname",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = false,
@@ -413,31 +407,29 @@ namespace OvexDataModelingTest.Data
                     max_length = 70,
                     label = "Segundo apellido",
                     placeholder = "Ingresa tu apellido materno",
-                    help_text = "Apellido materno como aparece en tu documento de identificacion"
+                    help_text = "Apellido materno como aparece en tu documento de identificación"
                 })
             };
-
-            var fEmailpf = new FieldDefinition
+            var fEmail_Pf = new FieldDefinition
             {
                 FieldId = 4,
-                FieldKey = "Email",
+                FieldKey = "email",
                 DataType = "EMAIL",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
-                    label = "Correo Electrónico",
-                    placeholder = "Ingresa tu Correo Electronico",
+                    label = "Correo electrónico",
+                    placeholder = "Ingresa tu correo electrónico",
                     regex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
                 })
             };
-
-            var fPhone_number = new FieldDefinition
+            var fPhone_Number = new FieldDefinition
             {
                 FieldId = 5,
-                FieldKey = "Phone_number",
+                FieldKey = "phone_Number",
                 DataType = "PHONE",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -448,13 +440,12 @@ namespace OvexDataModelingTest.Data
                     help_text = "Teléfono celular a 10 dígitos"
                 })
             };
-
-            var fRfc_pf = new FieldDefinition
+            var fRfc_Pf = new FieldDefinition
             {
                 FieldId = 6,
-                FieldKey = "Rfc",
+                FieldKey = "rfc_Pf",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -466,80 +457,74 @@ namespace OvexDataModelingTest.Data
                     help_text = "RFC de la persona física"
                 })
             };
-
             var fNationality = new FieldDefinition
             {
                 FieldId = 7,
-                FieldKey = "Nationality",
+                FieldKey = "nationality",
                 DataType = "DROPDOWN",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
                     label = "Nacionalidad",
                     placeholder = "Selecciona tu nacionalidad",
                     help_text = "Selecciona tu nacionalidad como aparece en tu documento de identificación",
-
-                    source = new
+                    allowed_values = new[]
                     {
-                        catalog_key = "nationalities",
-                        value_field = "id",
-                        text_field = "name",
-                        APIendpoint = "https://api.example.com/catalogs/nationalities"
+                        new { Item1 = "MEX", Item2 = "Mexico" },
                     }
+                    //source = new
+                    //{
+                    //    catalog_key = "nationalities",
+                    //    value_field = "id",
+                    //    text_field = "name",
+                    //    APIendpoint = "https://api.example.com/catalogs/nationalities"
+                    //}
                 })
-
             };
-
-            var fEULA = new FieldDefinition
+            var fEula = new FieldDefinition
             {
                 FieldId = 8,
-                FieldKey = "EULA",
+                FieldKey = "eula",
                 DataType = "BOOLEAN",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
-                    label = "Aceptación de Términos y Condiciones",
+                    label = "Términos y Condiciones",
                     help_text = "Debes aceptar los términos y condiciones para continuar",
                     link = "https://www.pchcapital.com/terminos-y-condiciones"
                 })
             };
-
-            var fGenderpf = new FieldDefinition
+            var fGender_Pf = new FieldDefinition
             {
                 FieldId = 9,
-                FieldKey = "Gender",
+                FieldKey = "gender_Pf",
                 DataType = "DROPDOWN",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
-                    label = "Genero",
-                    placeholder = "Selecciona tu genero",
+                    label = "Género",
+                    placeholder = "Selecciona tu género",
                     help_text = "Elige el género según las opciones establecidas en tu documento oficial.",
-                    source = new
+                    allowed_values = new[]
                     {
-
-                        value_field = "value",
-                        text_field = "label",
-                        options = new[]
-                            {
-                                new { value = "M", label = "Masculino" },
-                                new { value = "F", label = "Femenino" }
-                            }
+                        new { Item1 = "M", Item2 = "Masculino" },
+                        new { Item1 = "F", Item2 = "Femenino" },
+                        new { Item1 = "O", Item2 = "Otro" }
                     }
-                })
+                }),
             };
 
-            //STEPID 2 ADDRESS
+            // STEPID 2 - ADDRESS
 
-            var fstreet = new FieldDefinition
+            var fStreet = new FieldDefinition
             {
                 FieldId = 10,
-                FieldKey = "Street",
+                FieldKey = "street",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -550,65 +535,61 @@ namespace OvexDataModelingTest.Data
                     help_text = "Ingrese su domicilio"
                 })
             };
-
-            var fext_number = new FieldDefinition
+            var fExt_Number = new FieldDefinition
             {
                 FieldId = 11,
-                FieldKey = "Ext_number",
+                FieldKey = "ext_Number",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
                     min_length = 1,
                     max_length = 70,
-                    label = "Número Exterior",
+                    label = "Número exterior",
                     placeholder = "Ingrese su número exterior",
-                    help_text = "Ingrese su número exterior"
+                    help_text = "Ingrese el número exterior de su domicilio"
                 })
             };
-
-            var fint_number = new FieldDefinition
+            var fInt_Number = new FieldDefinition
             {
                 FieldId = 12,
-                FieldKey = "Int_number",
+                FieldKey = "int_Number",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = false,
                     min_length = 1,
                     max_length = 70,
-                    label = "Número Interior",
+                    label = "Número interior",
                     placeholder = "Ingrese su número interior",
                     help_text = "Ingrese su número interior (si aplica)"
                 })
             };
-
-            var fpostal_code = new FieldDefinition
+            var fPostal_Code = new FieldDefinition
             {
                 FieldId = 13,
-                FieldKey = "Postal_code",
+                FieldKey = "postal_Code",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
                     min_length = 5,
                     max_length = 5,
                     regex = "^[0-9]{5}$",
-                    label = "Código Postal",
+                    label = "Código postal",
                     placeholder = "01000",
                     help_text = "Código postal de tu domicilio"
                 })
             };
-
             var fColony = new FieldDefinition
             {
                 FieldId = 14,
-                FieldKey = "Colony",
+                FieldKey = "colony",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -619,13 +600,12 @@ namespace OvexDataModelingTest.Data
                     help_text = "Ingrese su colonia"
                 })
             };
-
             var fState = new FieldDefinition
             {
                 FieldId = 15,
-                FieldKey = "State",
+                FieldKey = "state",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -636,13 +616,12 @@ namespace OvexDataModelingTest.Data
                     help_text = "Ingrese su estado"
                 })
             };
-
             var fMunicipality = new FieldDefinition
             {
                 FieldId = 16,
-                FieldKey = "Municipality",
+                FieldKey = "municipality",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -654,22 +633,20 @@ namespace OvexDataModelingTest.Data
                 })
             };
 
+            // STEPID 3 - LEASING
 
-
-            //STEPID 3 LEASING
-
-            var fLeasing_type = new FieldDefinition
+            var fLeasing_Type = new FieldDefinition
             {
                 FieldId = 17,
-                FieldKey = "Leasing_type",
+                FieldKey = "leasing_Type",
                 DataType = "DROPDOWN",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
-                    label = "Tipo de Leasing",
-                    placeholder = "Selecciona el tipo de leasing",
-                    help_text = "Selecciona el tipo de leasing que deseas contratar",
+                    label = "Tipo de financiamiento",
+                    placeholder = "Selecciona el tipo de financiamiento",
+                    help_text = "Selecciona el tipo de financiamiento que deseas contratar",
                     source = new
                     {
                         value_field = "value",
@@ -677,39 +654,38 @@ namespace OvexDataModelingTest.Data
                         options = new[]
                             {
                                 new { value = 1, label = "Arrendamiento Puro" },
-                                new { value = 2, label = "Credito Simple" },
-                                new { value = 3, label = "Credito revolvente" },
+                                new { value = 2, label = "Crédito Simple" },
+                                new { value = 3, label = "Crédito Revolvente" },
                                 new { value = 4, label = "Factoraje Financiero" }
                             }
                     }
                 })
             };
-
-            var fRequested_amount = new FieldDefinition
+            var fRequested_Amount = new FieldDefinition
             {
                 FieldId = 18,
-                FieldKey = "Requested_amount",
+                FieldKey = "requested_Amount",
                 DataType = "NUMBER",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
                     min_value = 10000,
                     max_value = 5000000,
-                    label = "Monto Solicitado",
+                    label = "Monto solicitado",
                     placeholder = "100000",
                     help_text = "Monto que deseas solicitar (entre $10,000 y $5,000,000)"
                 })
             };
 
-            //STEPID 4 CREDENTIALS
+            // STEPID 4 - CREDENTIALS
 
             var fPassword = new FieldDefinition
             {
                 FieldId = 19,
-                FieldKey = "Password",
+                FieldKey = "password",
                 DataType = "PASSWORD",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -720,28 +696,26 @@ namespace OvexDataModelingTest.Data
                     help_text = "La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial."
                 })
             };
-
             var fConfirm_Password = new FieldDefinition
             {
                 FieldId = 20,
-                FieldKey = "Confirm_Password",
+                FieldKey = "confirm_Password",
                 DataType = "PASSWORD",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
-                    label = "Confirmar Contraseña",
+                    label = "Confirmar contraseña",
                     placeholder = "Confirma tu contraseña",
                     help_text = "Debes ingresar la misma contraseña que en el campo anterior para verificar."
                 })
             };
-
-            var fCIEC = new FieldDefinition
+            var fCiec = new FieldDefinition
             {
                 FieldId = 21,
-                FieldKey = "CIEC",
+                FieldKey = "ciec",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -752,13 +726,12 @@ namespace OvexDataModelingTest.Data
                     help_text = "Clave de Identificación Electrónica Confidencial del SAT"
                 })
             };
-
-            var fAuthorization_to_consult = new FieldDefinition
+            var fAuthorization_to_Consult = new FieldDefinition
             {
                 FieldId = 22,
-                FieldKey = "Authorization_to_consult",
+                FieldKey = "authorization_to_Consult",
                 DataType = "BOOLEAN",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
                     is_required = true,
@@ -768,23 +741,20 @@ namespace OvexDataModelingTest.Data
                 })
             };
 
-            //STEPID 5 REGISTER COMPLETE
-            var fregisterComplete = new FieldDefinition
+            // STEPID 5 - REGISTER COMPLETE
+
+            var fRegisterComplete = new FieldDefinition
             {
                 FieldId = 23,
-                FieldKey = "Register_Complete",
+                FieldKey = "register_Complete",
                 DataType = "TEXT",
-                Scope = "APLICATION",
+                Scope = "APPLICATION",
                 Config = JsonSerializer.Serialize(new
                 {
-
-                    Title = "Registro completado con Exito!",
+                    title = "Registro completado con Exito!",
                     p = "Gracias por registrarte en PCH Capital. Hemos recibido tu información y pronto nos pondremos en contacto contigo.",
-
                 })
             };
-
-
 
             #endregion
 
@@ -792,7 +762,11 @@ namespace OvexDataModelingTest.Data
             //fFullName, fEmail, fPhone, fCurp, fBirthDate, fGender,
             //fRfc, fCiec, fCompanyName, fLoanAmount, fVehicleCount,
             //fPostalCode, fAddress, fAccionistas, fNames, fPsurname,
-            fEmailpf, fPhone_number, fRfc_pf, fNationality, fEULA, fGenderpf, fregisterComplete); // NUEVO: Agregar accionistas
+            fNames, fPsurname, fMsurname, fEmail_Pf, fPhone_Number, fRfc_Pf, fNationality, fEula, fGender_Pf,
+            fStreet, fExt_Number, fInt_Number, fPostal_Code, fColony, fState, fMunicipality,
+            fLeasing_Type, fRequested_Amount,
+            fPassword, fConfirm_Password, fCiec, fAuthorization_to_Consult,
+            fRegisterComplete);
 
             // ==========================================
             // 4. ESTRUCTURA WORKFLOW 1: OVEX Cliente Individual
@@ -802,18 +776,12 @@ namespace OvexDataModelingTest.Data
             //var phase1_1 = new Phase { PhaseId = 1, WorkflowId = 1, Name = "Información Personal", Order = 1 };
             //db.Phases.Add(phase1_1);
 
-            var phase1_1Pf = new Phase { PhaseId = 1, WorkflowId = 4, Name = "Información Personal PCH PF", Order = 1 };
-            db.Phases.Add(phase1_1Pf);
-            var phase1_2Pf = new Phase { PhaseId = 2, WorkflowId = 4, Name = "Direccion PCH PF", Order = 2 };
-            db.Phases.Add(phase1_2Pf);
+            var phase1_1Pf = new Phase { PhaseId = 1, WorkflowId = 4, Name = "Información personal PCH PF", Order = 1 };
+            var phase1_2Pf = new Phase { PhaseId = 2, WorkflowId = 4, Name = "Dirección PCH PF", Order = 2 };
             var phase1_3Pf = new Phase { PhaseId = 3, WorkflowId = 4, Name = "Financiamiento PCH PF", Order = 3 };
-            db.Phases.Add(phase1_3Pf);
             var phase1_4Pf = new Phase { PhaseId = 4, WorkflowId = 4, Name = "Credenciales", Order = 4 };
-            db.Phases.Add(phase1_4Pf);
-            var phase1_5Pf = new Phase { PhaseId = 5, WorkflowId = 4, Name = "Registro Completo PCH PF", Order = 5 };
-            db.Phases.Add(phase1_5Pf);
-
-
+            var phase1_5Pf = new Phase { PhaseId = 5, WorkflowId = 4, Name = "Registro completo PCH PF", Order = 5 };
+            db.Phases.AddRange(phase1_1Pf, phase1_2Pf, phase1_3Pf, phase1_4Pf, phase1_5Pf);
 
             //var step1_1_1 = new Step { StepId = 1, PhaseId = 1, Name = "Datos Básicos", Order = 1 };
             //var step1_1_2 = new Step { StepId = 2, PhaseId = 1, Name = "Datos de Contacto", Order = 2 };
@@ -826,7 +794,6 @@ namespace OvexDataModelingTest.Data
             var setp1_1_5Pf = new Step { StepId = 5, PhaseId = 5, Name = "REGISTER_COMPLETE", Order = 5 };
             db.Steps.AddRange(setp1_1_1Pf, setp1_1_2Pf, setp1_1_3Pf, setp1_1_4Pf, setp1_1_5Pf);
 
-
             //// Step 1: Datos Básicos (nombre, fecha nascimento, género)
             //db.StepFields.AddRange(
             //    new Step_Field { StepId = 1, FieldId = 1, ConfigOverride = null }, // full_name
@@ -834,10 +801,9 @@ namespace OvexDataModelingTest.Data
             //    new Step_Field { StepId = 1, FieldId = 6, ConfigOverride = null }  // gender
             //);
 
-
             // Step 1: Datos Básicos 
             db.StepFields.AddRange(
-                new Step_Field { StepId = 1, FieldId = 1, ConfigOverride = null }, // email
+                new Step_Field { StepId = 1, FieldId = 1, ConfigOverride = null },
                 new Step_Field { StepId = 1, FieldId = 2, ConfigOverride = null },
                 new Step_Field { StepId = 1, FieldId = 3, ConfigOverride = null },
                 new Step_Field { StepId = 1, FieldId = 4, ConfigOverride = null },
@@ -847,7 +813,6 @@ namespace OvexDataModelingTest.Data
                 new Step_Field { StepId = 1, FieldId = 8, ConfigOverride = null },
                 new Step_Field { StepId = 1, FieldId = 9, ConfigOverride = null }
              );
-
 
             db.StepFields.AddRange(
                 new Step_Field { StepId = 2, FieldId = 10, ConfigOverride = null },
@@ -864,7 +829,6 @@ namespace OvexDataModelingTest.Data
                 new Step_Field { StepId = 3, FieldId = 18, ConfigOverride = null }
             );
 
-
             db.StepFields.AddRange(
                 new Step_Field { StepId = 4, FieldId = 19, ConfigOverride = null },
                 new Step_Field { StepId = 4, FieldId = 20, ConfigOverride = null },
@@ -875,7 +839,6 @@ namespace OvexDataModelingTest.Data
             db.StepFields.AddRange(
                  new Step_Field { StepId = 5, FieldId = 23, ConfigOverride = null }
             );
-
 
             //// Step 2: Datos de Contacto (email, teléfono, CURP)
             //db.StepFields.AddRange(
@@ -901,96 +864,96 @@ namespace OvexDataModelingTest.Data
             // ==========================================
 
             // Fase 2.1: Datos de Empresa
-            var phase2_1 = new Phase { PhaseId = 6, WorkflowId = 2, Name = "Información Empresarial", Order = 1 };
-            db.Phases.Add(phase2_1);
+            //var phase2_1 = new Phase { PhaseId = 6, WorkflowId = 2, Name = "Información Empresarial", Order = 1 };
+            //db.Phases.Add(phase2_1);
 
-            var step2_1_1 = new Step { StepId = 6, PhaseId = 3, Name = "Datos Fiscales", Order = 1 };
-            var step2_1_2 = new Step { StepId = 7, PhaseId = 3, Name = "Datos de Representante", Order = 2 };
-            db.Steps.AddRange(step2_1_1, step2_1_2);
+            //var step2_1_1 = new Step { StepId = 6, PhaseId = 3, Name = "Datos Fiscales", Order = 1 };
+            //var step2_1_2 = new Step { StepId = 7, PhaseId = 3, Name = "Datos de Representante", Order = 2 };
+            //db.Steps.AddRange(step2_1_1, step2_1_2);
 
             // Step 4: Datos Fiscales (RFC, CIEC, razón social)
-            db.StepFields.AddRange(
-                new Step_Field { StepId = 4, FieldId = 7, ConfigOverride = null }, // company_rfc
-                new Step_Field { StepId = 4, FieldId = 8, ConfigOverride = JsonSerializer.Serialize(new { is_required = true, min_length = 10 }) }, // clave_ciec
-                new Step_Field { StepId = 4, FieldId = 9, ConfigOverride = null }  // company_name
-            );
+            //db.StepFields.AddRange(
+            //    new Step_Field { StepId = 4, FieldId = 7, ConfigOverride = null }, // company_rfc
+            //    new Step_Field { StepId = 4, FieldId = 8, ConfigOverride = JsonSerializer.Serialize(new { is_required = true, min_length = 10 }) }, // clave_ciec
+            //    new Step_Field { StepId = 4, FieldId = 9, ConfigOverride = null }  // company_name
+            //);
 
-            // Step 5: Datos de Representante
-            db.StepFields.AddRange(
-                new Step_Field { StepId = 5, FieldId = 1, ConfigOverride = JsonSerializer.Serialize(new { label = "Nombre del Representante Legal" }) }, // full_name
-                new Step_Field { StepId = 5, FieldId = 2, ConfigOverride = null }, // email
-                new Step_Field { StepId = 5, FieldId = 3, ConfigOverride = null }  // phone
-            );
+            //// Step 5: Datos de Representante
+            //db.StepFields.AddRange(
+            //    new Step_Field { StepId = 5, FieldId = 1, ConfigOverride = JsonSerializer.Serialize(new { label = "Nombre del Representante Legal" }) }, // full_name
+            //    new Step_Field { StepId = 5, FieldId = 2, ConfigOverride = null }, // email
+            //    new Step_Field { StepId = 5, FieldId = 3, ConfigOverride = null }  // phone
+            //);
 
             // Fase 2.2: Solicitud
-            var phase2_2 = new Phase { PhaseId = 7, WorkflowId = 2, Name = "Detalles de Solicitud", Order = 2 };
-            db.Phases.Add(phase2_2);
+            //var phase2_2 = new Phase { PhaseId = 7, WorkflowId = 2, Name = "Detalles de Solicitud", Order = 2 };
+            //db.Phases.Add(phase2_2);
 
-            var step2_2_1 = new Step { StepId = 8, PhaseId = 4, Name = "Información de Flotilla", Order = 1 };
-            db.Steps.Add(step2_2_1);
+            //var step2_2_1 = new Step { StepId = 8, PhaseId = 4, Name = "Información de Flotilla", Order = 1 };
+            //db.Steps.Add(step2_2_1);
 
-            db.StepFields.AddRange(
-                new Step_Field { StepId = 6, FieldId = 11, ConfigOverride = null }, // vehicle_count
-                new Step_Field { StepId = 6, FieldId = 10, ConfigOverride = JsonSerializer.Serialize(new { label = "Monto Total Estimado" }) } // loan_amount
-            );
+            //db.StepFields.AddRange(
+            //    new Step_Field { StepId = 6, FieldId = 11, ConfigOverride = null }, // vehicle_count
+            //    new Step_Field { StepId = 6, FieldId = 10, ConfigOverride = JsonSerializer.Serialize(new { label = "Monto Total Estimado" }) } // loan_amount
+            //);
 
-            // NUEVO: Fase 2.3: Accionistas
-            var phase2_3 = new Phase { PhaseId = 8, WorkflowId = 2, Name = "Estructura Accionaria", Order = 3 };
-            db.Phases.Add(phase2_3);
+            //// NUEVO: Fase 2.3: Accionistas
+            //var phase2_3 = new Phase { PhaseId = 8, WorkflowId = 2, Name = "Estructura Accionaria", Order = 3 };
+            //db.Phases.Add(phase2_3);
 
-            var step2_3_1 = new Step { StepId = 9, PhaseId = 7, Name = "Accionistas", Order = 1 };
-            db.Steps.Add(step2_3_1);
+            //var step2_3_1 = new Step { StepId = 9, PhaseId = 7, Name = "Accionistas", Order = 1 };
+            //db.Steps.Add(step2_3_1);
 
-            db.StepFields.Add(
-                new Step_Field
-                {
-                    StepId = 10,
-                    FieldId = 14, // accionistas
-                    ConfigOverride = JsonSerializer.Serialize(new
-                    {
-                        label = "Accionistas de la Empresa",
-                        help_text = "Agregar la información de todos los accionistas que posean más del 10% de participación"
-                    })
-                }
-            );
+            //db.StepFields.Add(
+            //    new Step_Field
+            //    {
+            //        StepId = 10,
+            //        FieldId = 14, // accionistas
+            //        ConfigOverride = JsonSerializer.Serialize(new
+            //        {
+            //            label = "Accionistas de la Empresa",
+            //            help_text = "Agregar la información de todos los accionistas que posean más del 10% de participación"
+            //        })
+            //    }
+            //);
 
             // ==========================================
             // 6. ESTRUCTURA WORKFLOW 3: PCH Persona Moral
             // ==========================================
 
             // Fase 3.1: Información Corporativa
-            var phase3_1 = new Phase { PhaseId = 9, WorkflowId = 3, Name = "Información Corporativa", Order = 1 };
-            db.Phases.Add(phase3_1);
+            //var phase3_1 = new Phase { PhaseId = 9, WorkflowId = 3, Name = "Información Corporativa", Order = 1 };
+            //db.Phases.Add(phase3_1);
 
-            var step3_1_1 = new Step { StepId = 10, PhaseId = 5, Name = "Datos Fiscales de la Empresa", Order = 1 };
-            var step3_1_2 = new Step { StepId = 11, PhaseId = 5, Name = "Representante Legal", Order = 2 };
-            db.Steps.AddRange(step3_1_1, step3_1_2);
+            //var step3_1_1 = new Step { StepId = 10, PhaseId = 5, Name = "Datos Fiscales de la Empresa", Order = 1 };
+            //var step3_1_2 = new Step { StepId = 11, PhaseId = 5, Name = "Representante Legal", Order = 2 };
+            //db.Steps.AddRange(step3_1_1, step3_1_2);
 
-            // Step 7: Datos Fiscales
-            db.StepFields.AddRange(
-                new Step_Field { StepId = 7, FieldId = 9, ConfigOverride = null }, // company_name
-                new Step_Field { StepId = 7, FieldId = 7, ConfigOverride = null }, // company_rfc
-                new Step_Field { StepId = 7, FieldId = 8, ConfigOverride = null }  // clave_ciec
-            );
+            //// Step 7: Datos Fiscales
+            //db.StepFields.AddRange(
+            //    new Step_Field { StepId = 7, FieldId = 9, ConfigOverride = null }, // company_name
+            //    new Step_Field { StepId = 7, FieldId = 7, ConfigOverride = null }, // company_rfc
+            //    new Step_Field { StepId = 7, FieldId = 8, ConfigOverride = null }  // clave_ciec
+            //);
 
-            // Step 8: Representante Legal
-            db.StepFields.AddRange(
-                new Step_Field { StepId = 8, FieldId = 1, ConfigOverride = JsonSerializer.Serialize(new { label = "Nombre del Representante Legal" }) }, // full_name
-                new Step_Field { StepId = 8, FieldId = 2, ConfigOverride = JsonSerializer.Serialize(new { label = "Email Corporativo" }) }, // email
-                new Step_Field { StepId = 8, FieldId = 3, ConfigOverride = null }, // phone
-                new Step_Field { StepId = 8, FieldId = 4, ConfigOverride = JsonSerializer.Serialize(new { is_required = true }) } // curp
-            );
+            //// Step 8: Representante Legal
+            //db.StepFields.AddRange(
+            //    new Step_Field { StepId = 8, FieldId = 1, ConfigOverride = JsonSerializer.Serialize(new { label = "Nombre del Representante Legal" }) }, // full_name
+            //    new Step_Field { StepId = 8, FieldId = 2, ConfigOverride = JsonSerializer.Serialize(new { label = "Email Corporativo" }) }, // email
+            //    new Step_Field { StepId = 8, FieldId = 3, ConfigOverride = null }, // phone
+            //    new Step_Field { StepId = 8, FieldId = 4, ConfigOverride = JsonSerializer.Serialize(new { is_required = true }) } // curp
+            //);
 
-            // Fase 3.2: Solicitud de Financiamiento
-            var phase3_2 = new Phase { PhaseId = 10, WorkflowId = 3, Name = "Solicitud de Financiamiento", Order = 2 };
-            db.Phases.Add(phase3_2);
+            //// Fase 3.2: Solicitud de Financiamiento
+            //var phase3_2 = new Phase { PhaseId = 10, WorkflowId = 3, Name = "Solicitud de Financiamiento", Order = 2 };
+            //db.Phases.Add(phase3_2);
 
-            var step3_2_1 = new Step { StepId = 12, PhaseId = 6, Name = "Monto y Propósito", Order = 1 };
-            db.Steps.Add(step3_2_1);
+            //var step3_2_1 = new Step { StepId = 12, PhaseId = 6, Name = "Monto y Propósito", Order = 1 };
+            //db.Steps.Add(step3_2_1);
 
-            db.StepFields.AddRange(
-                new Step_Field { StepId = 9, FieldId = 10, ConfigOverride = JsonSerializer.Serialize(new { label = "Monto de Financiamiento Solicitado" }) } // loan_amount
-            );
+            //db.StepFields.AddRange(
+            //    new Step_Field { StepId = 9, FieldId = 10, ConfigOverride = JsonSerializer.Serialize(new { label = "Monto de Financiamiento Solicitado" }) } // loan_amount
+            //);
 
             // ==========================================
             // 7. ESTRATEGIAS (InstanceActionStrategies)

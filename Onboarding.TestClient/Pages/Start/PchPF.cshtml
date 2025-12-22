@@ -1,163 +1,158 @@
 @page
 @model Onboarding.TestClient.Pages.Start.PchPFModel
 @{
-	ViewData["Title"] = "PCH Capital - Persona Fisica";
+    ViewData["Title"] = "PCH Capital - Persona Fisica";
 }
 
 <div class="pch-pm-page">
-	<div class="container">
-		<div class="row justify-content-center">
-			<div class="col-lg-6 col-md-8">
-				<!-- Header -->
-				<div class="onboarding-header text-center mb-5">
-					<div class="brand-logo mb-4">
-						<i class="bi bi-briefcase"></i>
-					</div>
-					<h1 class="brand-title">PCH Capital</h1>
-					<h2 class="process-title">Persona Moral</h2>
-					<p class="process-description">
-						Financiamiento corporativo a tu medida
-					</p>
-				</div>
-
-				<!-- Form Card -->
-				<div class="form-card">
-					@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-					{
-						<div class="alert alert-danger">
-							<i class="bi bi-exclamation-triangle-fill me-2"></i>
-							@Model.ErrorMessage
-						</div>
-					}
-
-					<form method="post">
-
-						<div class="mb-4">
-							<label for="nombres" class="form-label">
-								<i class="bi bi-envelope me-2"></i>
-								Nombre(s)
-							</label>
-							<input type="email"
-								   class="form-control form-control-lg"
-								   id="email"
-								   name="email"
-								   asp-for="Email"
-								   placeholder="Ingrese su correo Electronico"
-								   required>
-							<div class="form-text">
-								Ingrese su correo electronico
-							</div>
-						</div>
-
-						<div class="d-grid gap-2">
-							<button type="submit" class="btn btn-primary btn-lg">
-								Iniciar Solicitud
-								<i class="bi bi-arrow-right ms-2"></i>
-							</button>
-							<a asp-page="/Index" class="btn btn-outline-secondary">
-								<i class="bi bi-arrow-left me-2"></i>
-								Volver
-							</a>
-						</div>
-					</form>
-				</div>
-
-				<!-- Info Footer -->
-				<div class="info-footer text-center mt-4">
-					<p class="text-muted">
-						<i class="bi bi-shield-lock me-2"></i>
-						Due diligence completo y confidencial
-					</p>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <!-- Header -->
+                <div class="onboarding-header text-center mb-5">
+                    <div class="brand-logo mb-4">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <h1 class="brand-title">PCH Capital</h1>
+                    <h2 class="process-title">Persona Física</h2>
+                    <p class="process-description">
+                        Financiamiento personal a tu medida
+                    </p>
+                </div>
+                <!-- Form Card -->
+                <div class="form-card">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @Model.ErrorMessage
+                        </div>
+                    }
+                    <form method="post">
+                        <div class="mb-4">
+                            <label for="nombres" class="form-label">
+                                <i class="bi bi-envelope me-2"></i>
+                                Correo electrónico
+                            </label>
+                            <input type="email"
+                                   class="form-control form-control-lg"
+                                   id="email"
+                                   name="email"
+                                   asp-for="Email"
+                                   placeholder="Ingrese su correo electrónico"
+                                   required>
+                            <div class="form-text">
+                                Ingrese su correo electrónico
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Iniciar solicitud
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                            <a asp-page="/Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Volver
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <!-- Info Footer -->
+                <div class="info-footer text-center mt-4">
+                    <p class="text-muted">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        Due diligence completo y confidencial
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-	.pch-pm-page {
-		min-height: 100vh;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		padding: 60px 20px;
-	}
+    .pch-pm-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 60px 20px;
+    }
 
-	.brand-logo {
-		font-size: 5rem;
-		color: white;
-		text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-	}
+    .brand-logo {
+        font-size: 5rem;
+        color: white;
+        text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    }
 
-	.brand-title {
-		color: white;
-		font-size: 3rem;
-		font-weight: 800;
-		margin-bottom: 10px;
-		text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-	}
+    .brand-title {
+        color: white;
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
 
-	.process-title {
-		color: rgba(255,255,255,0.95);
-		font-size: 1.5rem;
-		font-weight: 600;
-		margin-bottom: 15px;
-	}
+    .process-title {
+        color: rgba(255,255,255,0.95);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
 
-	.process-description {
-		color: rgba(255,255,255,0.9);
-		font-size: 1.1rem;
-	}
+    .process-description {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+    }
 
-	.form-card {
-		background: white;
-		border-radius: 20px;
-		padding: 40px;
-		box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-	}
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
 
-	.form-label {
-		font-weight: 600;
-		color: #2c3e50;
-		font-size: 1.1rem;
-	}
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
 
-	.form-control {
-		border-radius: 10px;
-		border: 2px solid #e0e0e0;
-		padding: 15px;
-	}
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        padding: 15px;
+    }
 
-		.form-control:focus {
-			border-color: #667eea;
-			box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-		}
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
 
-	.btn-primary {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		border: none;
-		border-radius: 10px;
-		font-weight: 600;
-		transition: all 0.3s ease;
-	}
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
 
-		.btn-primary:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-		}
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
 
-	.btn-outline-secondary {
-		border-radius: 10px;
-		border: 2px solid #e0e0e0;
-		color: #5a6c7d;
-		font-weight: 600;
-	}
+    .btn-outline-secondary {
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        color: #5a6c7d;
+        font-weight: 600;
+    }
 
-		.btn-outline-secondary:hover {
-			background-color: #f8f9fa;
-			border-color: #d0d0d0;
-		}
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            border-color: #d0d0d0;
+        }
 
-	.info-footer p {
-		font-size: 0.95rem;
-		color: white !important;
-	}
+    .info-footer p {
+        font-size: 0.95rem;
+        color: white !important;
+    }
 </style>
